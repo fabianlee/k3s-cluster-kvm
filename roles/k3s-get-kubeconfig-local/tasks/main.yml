@@ -1,0 +1,49 @@
+---
+
+- name: make k3s.yaml readable without root
+  become: yes
+  file:
+    path: "{{kubeconfig}}"
+    mode: 766
+
+- name: create .kube directory for ubuntu
+  file:
+    path: /home/ubuntu/.kube
+    owner: ubuntu
+    mode: 0775
+
+- name: create .kube directory for root
+  become: yes
+  file:
+    path: /root/.kube
+    mode: 0775
+
+- name: copy k3s.yaml to standard .kube/config location for ubuntu
+  become: yes
+  copy:
+    src: "{{kubeconfig}}"
+    dest: "/home/ubuntu/.kube/config"
+    remote_src: true
+    mode: 0776
+    owner: ubuntu
+
+- name: copy k3s.yaml to standard .kube/config location for root
+  become: yes
+  copy:
+    src: "{{kubeconfig}}"
+    dest: "/root/.kube/config"
+    remote_src: true
+    mode: 0776
+
+- name: copy kubectl back to calling host
+  fetch:
+    src: /home/ubuntu/.kube/config
+    dest: /tmp/k3s-kubeconfig
+    flat: yes
+
+- name: replace localhost with master-ip {{ master_ip }}
+  delegate_to: localhost
+  replace:
+    path: /tmp/k3s-kubeconfig
+    regexp: "127.0.0.1"
+    replace: "{{master_ip}}"

@@ -1,0 +1,38 @@
+---
+
+- name: applying...
+  debug: msg="applying...."
+
+- name: create kubectl config
+  become: yes
+  changed_when: true
+  shell: microk8s config > ~/.kube/config
+  args:
+    executable: /bin/bash
+
+- name: check kubectl
+  become: yes
+  command: kubectl get nodes
+  register: getnodes
+
+- debug:
+    msg: "{{getnodes.stdout_lines}}"
+
+- name: create file out of every jinja2 template
+  template:
+    src: "{{item}}"
+    dest: "{{TMPDIR}}/{{ item | basename | regex_replace('.j2$', '') }}"
+  with_fileglob: "../templates/*.j2"
+
+- name: apply isto operator deployment config
+  shell: "kubectl apply -f {{TMPDIR}}/helloworld.yaml"
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: apply isto operator virtual service and gateway config
+  shell: "kubectl apply -f {{TMPDIR}}/helloworld-gateway.yaml"
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+

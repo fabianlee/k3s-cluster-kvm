@@ -1,0 +1,50 @@
+---
+
+#- name: make k3s.yaml readable without root
+#  become: yes
+#  file:
+#    path: /etc/rancher/k3s/k3s.yaml
+#    mode: 766
+
+- name: copy manifests to /tmp
+  copy:
+    src: "{{item}}"
+    dest: /tmp
+    mode: 0766
+  with_fileglob: "*.yaml"
+
+# https://metallb.universe.tf/installation/
+- name: apply metallb manifests
+  k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    src: "/tmp/{{item}}"
+  loop:
+    - namespace.yaml
+    - metallb.yaml
+
+- name: create metallb ns
+  k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: metallb-system
+    kind: Namespace
+
+- name: create metallb configmap
+  k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        namespace: metallb-system
+        name: config
+      data:
+        config: |
+          address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+            - 192.168.2.143-192.168.2.144
+

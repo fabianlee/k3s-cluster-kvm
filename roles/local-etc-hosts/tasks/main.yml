@@ -1,0 +1,4 @@
+---
+
+- name: local etc hosts
+  import_tasks: etc-hosts.yml

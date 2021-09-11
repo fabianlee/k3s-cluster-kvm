@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: nginx
+  name: nginx-ds
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          #image: localhost:32000/nginx:1.20.1
+          image: docker.io/nginx:1.20.1
+          ports:
+            - name: web
+              containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  ports:
+    - port: 8080
+      targetPort: web
+  selector:
+    app: nginx
+  type: LoadBalancer
+#---
+#apiVersion: traefik.containo.us/v1alpha1
+#kind: IngressRoute
+#metadata:
+#  name: nginx-ingressroute
+#  namespace: default
+#spec:
+#  entryPoints:
+#    - web
+#  routes:
+#  - match: PathPrefix(`/index.html`)
+#    kind: Rule
+#    services:
+#    - name: nginx-service
+#      port: 80

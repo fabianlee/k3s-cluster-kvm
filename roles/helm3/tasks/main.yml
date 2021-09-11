@@ -1,0 +1,27 @@
+---
+
+- name: add helm3 key to apt
+  apt_key:
+    url: https://baltocdn.com/helm/signing.asc
+    state: present
+
+- name: add helm3 apt repository
+  apt_repository:
+    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+    state: present
+    filename: helm3
+    validate_certs: false
+
+- name: make sure apt transport package installed
+  apt:
+    update_cache: true
+    pkg:
+    - apt-transport-https
+    - helm
+    state: present
+
+- name: create symlink for helm3
+  file:
+    src: /usr/sbin/helm
+    dest: /usr/local/bin/helm3
+    state: link

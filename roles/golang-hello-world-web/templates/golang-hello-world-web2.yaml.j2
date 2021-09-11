@@ -1,0 +1,103 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: golang-hello-world-web-service2
+  #namespace: default
+  labels:
+    app: golang-hello-world-web2
+spec:
+  ports:
+  # port=available to other containers
+  - port: 8080
+    name: http
+    # targetPort=exposed from inside container
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: golang-hello-world-web2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: golang-hello-world-web2
+  # allow for override: kubectl -n <ns> apply ...
+  #namespace: default
+  labels:
+    app: golang-hello-world-web2
+spec:
+  selector:
+    matchLabels:
+      app: golang-hello-world-web2
+  # kubectl scale --replicas=x deployment/golang-hello-world-web
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: golang-hello-world-web2
+      # skip any istio auto-injection
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - golang-hello-world-web2
+            topologyKey: "kubernetes.io/hostname"
+
+      containers:
+      - name: golang-hello-world-web
+        image: fabianlee/docker-golang-hello-world-web:1.0.0
+        env:
+
+        # default variables available to be overridden
+        - name: APP_CONTEXT
+          # if set to /test/' would only deliver from that path
+          value: "/myhello2/"
+        - name: PORT
+          value: "8080"
+
+        # Downward API support - inserts these into container as env variables
+        # https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/#use-pod-fields-as-values-for-environment-variables
+        - name: MY_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: MY_POD_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+
+      restartPolicy: Always

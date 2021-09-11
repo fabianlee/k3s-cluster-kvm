@@ -1,0 +1,9 @@
+istio_version: 1.7.5
+TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
+
+# name of secondary istio ingress
+istio_ingressgateway_secondary_name: istio-ingressgateway-secondary
+
+istio_ingressgateway_nodeport: 32601
+istio_ingressgateway_nodeport_secondary: 32701
+istio_ingressgateway_secondary_selector: ingressgateway-secondary

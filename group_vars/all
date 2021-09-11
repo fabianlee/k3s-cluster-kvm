@@ -1,0 +1,14 @@
+---
+ansible_python_interpreter: /usr/bin/python3
+
+# https://github.com/rancher/k3s/releases/latest
+# https://github.com/k3s-io/k3s/releases/tag/v1.21.4+k3s1
+k3s_version: v1.21.4+k3s1
+
+ansible_user: ubuntu
+systemd_dir: /etc/systemd/system
+master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
+extra_server_args: " --disable servicelb --disable traefik" # so that klipper is disabled, and metalLB can be used
+extra_agent_args: ""
+
+

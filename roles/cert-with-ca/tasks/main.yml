@@ -1,0 +1,19 @@
+# dependency on: ansible-galaxy collection install community.crypto
+# needs PyOpenSSL or cryptogrphy
+#
+# set to force:no so that once a key/cert pair is created, we don't overwrite
+#
+---
+
+- name: custom CA certificate authority
+  import_tasks: ca.yml
+
+- name: create certificate for primary ingress
+  import_tasks: generate-cert.yml
+  vars:
+   cert_domains_list: "{{cert_domains_primary_ingress}}"
+
+- name: create certificate for secondary ingress
+  import_tasks: generate-cert.yml
+  vars:
+   cert_domains_list: "{{cert_domains_secondary_ingress}}"

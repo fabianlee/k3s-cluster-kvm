@@ -1,0 +1,24 @@
+---
+
+- hosts: master
+  gather_facts: yes
+  become: yes
+
+  # most vars are coming from 'group_vars/' directory
+  vars:
+    # version needed by more than one role (namespace labels)
+    istio_version: 1.9.7 # validated on 1.7.5 and 1.9.7
+    istio_ingress_tested_from_localhost: true
+
+  roles:
+    - role: k3s-metallb
+
+    # istio operator (istio-operator) and primary+secondary ingress gateway services (istio-system)
+    - role: istio-operator
+
+    # istio gateways (default)
+    - role: istio-gateway
+
+    # deploys hello world to primary and secondary
+    - role: istio-helloworld
+

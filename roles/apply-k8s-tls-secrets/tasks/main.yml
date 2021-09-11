@@ -1,0 +1,15 @@
+---
+  
+- name: recreate tls secrets for primary certificate
+  import_tasks: apply-tls.yml
+  when: tls_secret_overwrite
+  vars:
+    cert_domains_list: "{{cert_domains_primary_ingress}}"
+    secret_name: tls-credential
+
+- name: recreate tls secrets for secondary certificate
+  import_tasks: apply-tls.yml
+  when: tls_secret_overwrite
+  vars:
+    cert_domains_list: "{{cert_domains_secondary_ingress}}"
+    secret_name: tls-secondary-credential

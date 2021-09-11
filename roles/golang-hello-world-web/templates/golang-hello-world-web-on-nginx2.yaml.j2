@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: golang-hello-world-web-service2
+  #namespace: default
+  annotations:
+    # matches ingress-class arg at: 
+    #   roles/add_secondary_ingress/templates/nginx-ingress-secondary-microk8s-controller.yaml.j2
+    kubernetes.io/ingress.class: secondary
+spec:
+  tls:
+  - hosts: {{ cert_domains_secondary_ingress | to_json }}
+    # secret must be in same namespace
+    secretName: tls-secondary-credential
+  rules:
+
+  - host: {{ cert_domains_secondary_ingress | first }}
+    http:
+      paths:
+      - pathType: Prefix #Exact
+        path: "/myhello2/"
+        backend:
+          service:
+            name: golang-hello-world-web-service2
+            port:
+              number: 8080
+

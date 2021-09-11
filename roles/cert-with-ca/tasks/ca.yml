@@ -1,0 +1,49 @@
+---
+
+#
+# Create CA 
+# https://milliams.com/posts/2020/ansible-certificate-authority/
+#
+- name: create CA key
+  community.crypto.openssl_privatekey:
+    path: "{{TMPDIR}}/{{cert_CA}}.key"
+    force: "{{ca_overwrite}}"
+  register: ca_key
+
+- name: create the CA CSR
+  community.crypto.openssl_csr:
+    path: "{{TMPDIR}}/{{cert_CA}}.csr"
+    privatekey_path: "{{ ca_key.filename }}"
+    # constraints and usage required by CA
+    basic_constraints_critical: true
+    basic_constraints:
+      - CA:TRUE
+      - pathlen:3
+    key_usage:
+      - digitalSignature
+      - cRLSign
+      - keyCertSign
+    common_name: "{{cert_CA}}"
+    force: "{{ca_overwrite}}"
+  register: ca_csr
+
+- name: sign the CA CSR
+  openssl_certificate:
+    path: "{{TMPDIR}}/{{cert_CA}}.crt"
+    csr_path: "{{ ca_csr.filename }}"
+    privatekey_path: "{{ ca_key.filename }}"
+    provider: selfsigned
+    force: "{{ca_overwrite}}"
+  register: ca_crt
+
+- name: remove local ca cert, before fetching again
+  delegate_to: localhost
+  file:
+    path: "{{LOCALDIR}}/{{ca_crt.filename}}"
+    state: absent
+- name: copy ca cert locally, so it can be loaded into trusted CA of host
+  fetch:
+    src: "{{ca_crt.filename}}"
+    dest: "{{LOCALDIR}}/"
+    flat: true
+

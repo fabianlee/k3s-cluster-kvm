@@ -1,0 +1,39 @@
+---
+
+- name: check kubectl
+  become: yes
+  command: kubectl get nodes
+  register: getnodes
+- debug: msg="{{getnodes.stdout_lines}}"
+
+- name: make sure cert pair exists
+  stat:
+    path: "{{item}}"
+  register: cert_existence
+  failed_when: not cert_existence.stat.exists
+  loop:
+    - "{{TMPDIR}}/{{ cert_domains_list | first }}.crt"
+    - "{{TMPDIR}}/{{ cert_domains_list | first }}.key"
+
+- name: make sure namespace exist
+  command: kubectl create ns {{item}}
+  register: result
+  failed_when: not result.rc in [0,1]
+  loop: "{{ secret_namespace_list }}"
+
+- name: delete tls secret when tls_secret_overwrite set to yes
+  command: kubectl delete -n {{item}} secret {{secret_name}}
+  register: result
+  failed_when: not result.rc in [0,1]
+  loop: "{{ secret_namespace_list }}"
+
+- name: create tls secret {{secret_name}}
+  command: kubectl create -n {{item}} secret tls {{secret_name}} --key={{TMPDIR}}/{{ cert_domains_list | first }}.key --cert={{TMPDIR}}/{{ cert_domains_list | first }}.crt
+  become: yes
+  register: create_result
+  loop: "{{ secret_namespace_list }}"
+
+- debug: msg="ok"
+  loop: "{{create_result.results}}"
+  loop_control:
+    label: "{{item.stdout}}"

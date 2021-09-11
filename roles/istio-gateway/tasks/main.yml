@@ -1,0 +1,127 @@
+---
+
+- name: check kubectl
+  become: yes
+  command: kubectl get nodes
+  register: getnodes
+- debug: msg="{{getnodes.stdout_lines}}"
+
+- name: make sure cert pair exists
+  stat:
+    path: "{{item}}"
+  register: cert_existence
+  failed_when: not cert_existence.stat.exists
+  loop:
+    - "{{TMPDIR}}/{{ cert_domains_primary_ingress | first }}.crt"
+    - "{{TMPDIR}}/{{ cert_domains_primary_ingress | first }}.key"
+
+- name: copy helloworld manifests to host
+  copy:
+    src: "{{item}}"
+    dest: "{{TMPDIR}}/{{ item | basename }}"
+  with_fileglob: "hello*.yaml"
+
+- name: apply helloworld v1 and v2 Deployment and Service
+  shell: kubectl apply -f {{TMPDIR}}/{{ item | basename }}
+  become: yes
+  register: stdout
+  with_fileglob: "hello*.yaml"
+- debug: msg="{{stdout.results}}"
+
+- name: create file out of every jinja2 templates
+  template:
+    src: "{{item}}"
+    dest: "{{TMPDIR}}/{{ item | basename | regex_replace('.j2$', '') }}"
+  with_fileglob: "../templates/*.j2"
+
+- name: apply istio Gateway configs
+  shell: kubectl apply -f {{TMPDIR}}/{{ item | basename | regex_replace('\.j2$', '') }}
+  become: yes
+  register: stdout
+  with_fileglob: "../templates/gateway*.j2"
+- debug: msg="{{stdout.results}}"
+
+- name: allow setting after gateawy configs applied
+  pause:
+    seconds: 15
+
+- name: apply hello v1 and v2 VirtualService configs that project to Gateway
+  shell: kubectl apply -f {{TMPDIR}}/{{ item | basename | regex_replace('\.j2$', '') }}
+  become: yes
+  register: stdout
+  with_fileglob: "../templates/hello*.j2"
+- debug: msg="{{stdout.results}}"
+
+- debug: msg="TODO test curl directly to pods IP:5000, then curl directly to service IP:5000"
+
+
+- name: allow setting after VirtualService projected to Gateway
+  pause:
+    seconds: 20
+
+- name: kubectl to get helloworld service URL
+  command: |
+    kubectl get service helloworld -n default --output jsonpath='http://{.spec.clusterIP}:{.spec.ports[?(@.name=="http")].port}/hello'
+  register: url_from_service
+- debug: msg="{{url_from_service.stdout}}"
+- name: test pull from helloworld
+  uri:
+    url: "{{url_from_service.stdout}}"
+    method: GET
+    return_content: true
+  register: pull_result
+- debug: msg="{{pull_result.content}}"
+
+- name: kubectl to get helloworld2 service URL
+  command: |
+    kubectl get service helloworld2 -n default --output jsonpath='http://{.spec.clusterIP}:{.spec.ports[?(@.name=="http")].port}/hello'
+  register: url_from_service
+- debug: msg="{{url_from_service.stdout}}"
+- name: test pull from helloworld2
+  uri:
+    url: "{{url_from_service.stdout}}"
+    method: GET
+    return_content: true
+  register: pull_result
+- debug: msg="{{pull_result.content}}"
+
+
+- command: kubectl get service istio-ingressgateway -n istio-system --output jsonpath='{.spec.clusterIP}'
+  register: primary_clusterIP
+- command: kubectl get service istio-ingressgateway-secondary -n istio-system --output jsonpath='{.spec.clusterIP}'
+  register: secondary_clusterIP
+- debug: msg="ClusterIP primary/secondary {{":"}} {{primary_clusterIP.stdout}}/{{secondary_clusterIP.stdout}}"
+
+- command: kubectl get service istio-ingressgateway -n istio-system --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: primary_lbIP
+- command: kubectl get service istio-ingressgateway-secondary -n istio-system --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: secondary_lbIP
+- debug: msg="LB primary/secondary {{":"}} {{primary_lbIP.stdout}}/{{secondary_lbIP.stdout}}"
+
+- name: copy istio gateway test to remote host
+  copy:
+    src: test-istio-gateway.sh
+    dest: "{{TMPDIR}}/test-istio-gateway.sh"
+    mode: '0755'
+
+- debug: 
+    msg: "test-istio-gateway.sh {{primary_lbIP.stdout}} {{cert_domains_primary_ingress|join(',')}} {{secondary_lbIP.stdout}} {{cert_domains_secondary_ingress|join(',') }}"
+
+- block:
+    - name: test pulling pages from primary and secondary ingress gateways, from localhost
+      delegate_to: localhost
+      command: "{{role_path}}/files/test-istio-gateway.sh {{primary_lbIP.stdout}} {{cert_domains_primary_ingress|join(',')}} {{secondary_lbIP.stdout}} {{cert_domains_secondary_ingress|join(',')}}"
+      register: stdout
+    - debug: msg="{{stdout.stdout_lines}}"
+    - debug: msg="{{stdout.cmd | join(' ') }}"
+  when: istio_ingress_tested_from_localhost
+
+- block:
+    - name: test pulling pages from primary and secondary ingress gateways, from target host
+      command: "{{TMPDIR}}/test-istio-gateway.sh {{primary_clusterIP.stdout}} {{cert_domains_primary_ingress|join(',')}} {{secondary_clusterIP.stdout}} {{cert_domains_secondary_ingress|join(',')}}"
+      register: stdout
+      when: not istio_ingress_tested_from_localhost
+
+    - debug: msg="{{stdout.stdout_lines}}"
+    - debug: msg="{{stdout.cmd | join(' ') }}"
+  when: not istio_ingress_tested_from_localhost

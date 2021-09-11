@@ -1,0 +1,34 @@
+---
+# for SAN certificate with custom CA
+cert_CA: myCA.local
+cert_domains_primary_ingress: ['k3s.local','k3s-alt.local']
+cert_domains_secondary_ingress: ['k3s-secondary.local']
+#cert_overwrite: yes
+#tls_secret_overwrite: true
+
+# content that needs to go into netplan of first master
+# these NIC should be peers of the host (e.g. 192.168.1.0/24)
+additional_nic:
+  - id: ens4
+    netplan:
+      addresses:
+      - 192.168.2.143/24
+      dhcp4: false
+      gateway4: 192.168.2.1
+      nameservers:
+        addresses:
+        - 192.168.2.1
+        search:
+        - home.lab
+  - id: ens5
+    netplan: 
+      addresses:
+      - 192.168.2.144/24
+      dhcp4: false
+      gateway4: 192.168.2.1
+      nameservers:
+        addresses:
+        - 192.168.2.1
+        search:
+        - home.lab
+

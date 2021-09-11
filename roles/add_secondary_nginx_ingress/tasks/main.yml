@@ -1,0 +1,28 @@
+---
+
+- name: check kubectl
+  become: yes
+  command: kubectl get nodes
+  register: getnodes
+- debug: msg="{{getnodes.stdout_lines}}"
+
+- name: create file out of every jinja2 template
+  template:
+    src: "{{item}}"
+    dest: "./{{ item | basename | regex_replace('.j2$', '') }}"
+  with_fileglob: "../templates/*.j2"
+
+- name: creates secondary nginx ingress controller, first 'nginx' already created by manifest
+  shell: kubectl apply -f ./nginx-ingress-secondary-controller.yaml
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: apply metalLB service to additional nics added to master
+  shell: kubectl apply -f ./nginx-ingress-secondary-service.yaml
+  become: yes
+  register: stdout
+  retries: 3
+  delay: 20
+  until: stdout.rc == 0
+- debug: msg="{{stdout.stdout_lines}}"

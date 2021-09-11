@@ -1,0 +1,143 @@
+---
+
+- name: create kubectl config
+  become: yes
+  changed_when: true
+  shell: microk8s config > ~/.kube/config
+  args:
+    executable: /bin/bash
+
+- name: check kubectl
+  become: yes
+  command: kubectl get nodes
+  register: getnodes
+
+- debug:
+    msg: "{{getnodes.stdout_lines}}"
+
+- name: istio release exists
+  stat:
+    path: "{{TMPDIR}}/istio-{{istio_version}}"
+  register: istio_exists
+
+- name: download and install istio package
+  shell: "curl -L https://istio.io/downloadIstio | ISTIO_VERSION={{istio_version}} TARGET_ARCH=x86_64 sh -"
+  args:
+    chdir: "{{TMPDIR}}"
+    warn: false
+  when: not istio_exists.stat.exists
+
+- name: change permissions to all files for istio download
+  file:
+    state: directory
+    path: "{{TMPDIR}}/istio-{{istio_version}}"
+    recurse: yes
+    # directories to 644, files to 755
+    mode: u=rwX,g=rX,o=rX
+    #mode: o+rwx
+
+- name: create kubectl config for istio
+  become: yes
+  changed_when: true
+  shell: microk8s config -l > {{TMPDIR}}/istio-kubeconfig
+  args:
+    executable: /bin/bash
+
+- name: istio precheck
+  become: yes
+  command: "{{TMPDIR}}/istio-{{istio_version}}/bin/istioctl --kubeconfig {{TMPDIR}}/istio-kubeconfig experimental precheck"
+  args:
+    creates: istio-precheck.done
+  register: precheck
+- debug: msg="{{precheck.stdout_lines}}"
+
+- name: istio operator init
+  command: "{{TMPDIR}}/istio-{{istio_version}}/bin/istioctl --kubeconfig {{TMPDIR}}/istio-kubeconfig operator init --revision {{ istio_version | replace('.','-') }}"
+  args: 
+    creates: istio-operator-init.done
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: check istio-operator namespace for objects 
+  command: kubectl get all -n istio-operator
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: check istio operator log for errors 
+  shell: 'kubectl logs --since=15m -n istio-operator $(kubectl get pods -n istio-operator -lname=istio-operator -o jsonpath="{.items[0].metadata.name}")'
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: create istio operator config
+  template:
+    src: istio-operator.yaml.j2
+    dest: "{{TMPDIR}}/istio-operator.yaml"
+    mode: '0666'
+
+- name: apply isto operator config
+  shell: "kubectl apply -f {{TMPDIR}}/istio-operator.yaml"
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+
+- name: wait for 3 istio pods in istio-system istiod, gateway, secondary gateway
+  shell: kubectl get pods -n istio-system | grep -i Running | wc -l
+  become: yes
+  register: runningpod_count
+  retries: 14 
+  delay: 30
+  until: runningpod_count.stdout|int >= 3
+- debug: msg="{{runningpod_count.stdout_lines}}"
+
+
+- command: kubectl get services -n istio-system
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: describe webhooks should contain istio sidecar
+  #command: "kubectl describe mutatingwebhookconfiguration istio-sidecar-injector-{{ istio_version | replace('.','-') }}"
+  command: "kubectl get mutatingwebhookconfiguration"
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: disable istio injection in standard namespaces
+  command: "kubectl label namespace {{item}} istio-system istio-injection=disabled --overwrite=true"
+  become: yes
+  loop: [ 'istio-system', 'istio-operator' ]
+  register: stdout
+
+- command: "kubectl get namespace -L istio-injection"
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: enable istio injection /rev on standard namespaces
+  command: "kubectl label namespace {{item}} istio.io/rev={{ istio_version | replace('.','-') }} --overwrite=true"
+  become: yes
+  loop: [ 'default', 'istio-operator' ]
+  register: stdout
+
+- command: "kubectl get namespace -L istio.io/rev"
+  become: yes
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+
+- name: create istio mtls config
+  template:
+    src: istio-peerauth.yaml.j2
+    dest: "{{TMPDIR}}/istio-peerauth.yaml"
+    mode: '0666'
+- name: apply mutual TLS policy, may need to wait for pods to settle
+  command: "kubectl apply -f {{ istio_dir }}/istio-peerauth.yaml"
+  become: yes
+  register: stdout
+  retries: 10
+  delay: 60
+  until: stdout.rc == 0
+- debug: msg="{{stdout.stdout_lines}}"

@@ -1,0 +1,19 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: hello-v1-on-gateway-ingressgateway
+spec:
+  hosts: {{ cert_domains_primary_ingress | to_json }}
+  gateways:
+  - gateway-ingressgateway
+  http:
+  - match:
+    - uri:
+        exact: /hello
+    route:
+    - destination:
+        host: helloworld
+        port:
+          number: 5000
+

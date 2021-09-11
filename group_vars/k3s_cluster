@@ -1,0 +1,19 @@
+---
+
+# configure these users with proper: group, permissions, ~/.kube/config
+users: ['ubuntu'] # 'fabian' for virtualbox, 'ubuntu' for kvm/libvirt
+
+# place in /etc/hosts of each
+local_etc_hosts:
+  # cluster nodes must see each other
+  - ip: 192.168.122.213
+    fqdn: k3s-1
+  - ip: 192.168.122.214
+    fqdn: k3s-2
+  - ip: 192.168.122.215
+    fqdn: k3s-3
+  # allows curl to MetalLB endpoints with proper host header
+  - ip: 192.168.2.143
+    fqdn: k3s.local
+  - ip: 192.168.2.144
+    fqdn: k3s-secondary.local

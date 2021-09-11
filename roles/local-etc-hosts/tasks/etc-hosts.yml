@@ -1,0 +1,22 @@
+---
+
+- name: add entry to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item.ip }}\t{{item.fqdn}}"
+    insertafter: EOF
+  loop: "{{local_etc_hosts}}"
+
+
+- name: check cloud-init master for /etc/hosts
+  stat:
+    path: /etc/cloud/templates/hosts.debian.tmpl
+  register: cloudinit_existence
+
+- name: add entry to cloud-init master for /etc/hosts
+  lineinfile:
+    path: /etc/cloud/templates/hosts.debian.tmpl
+    line: "{{ item.ip }}\t{{item.fqdn}}"
+    insertafter: EOF
+  when: cloudinit_existence.stat.exists
+  loop: "{{local_etc_hosts}}"

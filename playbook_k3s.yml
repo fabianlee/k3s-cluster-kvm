@@ -1,0 +1,41 @@
+---
+
+# ubuntu prereq and install k9s gui
+- hosts: k3s_cluster
+  gather_facts: yes
+  become: yes
+  tags:
+    - prereq
+  roles:
+    - k3s-prereq
+
+- hosts: k3s_cluster
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: prereq
+    - role: download
+
+- hosts: master
+  become: yes
+  roles:
+    - role: k3s/master
+
+- hosts: node
+  become: yes
+  roles:
+    - role: k3s/node
+
+- hosts: master
+  become: yes
+  roles:
+    - role: additional-netplan-ip
+    - { role: k3s-get-kubeconfig-local, tags: ['kubeconfig'] }
+    - role: cert-with-ca
+    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default'] }
+    - role: k9s
+
+- hosts: master
+  become: no
+  roles:
+    - role: tiny-tools-all-nodes

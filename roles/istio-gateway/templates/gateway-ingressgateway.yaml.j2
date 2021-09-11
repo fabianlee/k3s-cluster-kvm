@@ -1,0 +1,27 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: gateway-ingressgateway
+spec:
+  selector:
+    istio: "{{istio_ingressgateway_primary_selector}}"
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    # NOTE: if using GCP LB, SNI names are not passed through. 
+    # You would need to use '*' in Gateway, and specify hostnames at VirtualService instead
+    # https://cloud.google.com/security/encryption-in-transit#secure_backend_protocol_considerations
+    hosts: {{ cert_domains_primary_ingress | to_json }}
+  - port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: tls-credential
+    # NOTE: if using GCP LB, SNI names are not passed through. 
+    # You would need to use '*' in Gateway, and specify hostnames at VirtualService instead
+    hosts: {{ cert_domains_primary_ingress | to_json }}

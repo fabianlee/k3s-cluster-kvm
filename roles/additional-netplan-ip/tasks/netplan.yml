@@ -1,0 +1,28 @@
+---
+
+- name: add content to netplan
+  blockinfile:
+    state: present
+    dest: /etc/netplan/50-cloud-init.yaml
+    marker_begin: "BEGIN {{item}}"
+    marker_end: "END {{item}}"
+    insertbefore: "version: 2"
+    content: "        {{additional_nic[item].id}}:\n          {{ additional_nic[item].netplan | to_nice_yaml(indent=4) | indent(10) }}"
+  loop:
+    - 0
+    - 1
+
+- name: netplan generate
+  command: netplan generate
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: netplan apply
+  command: netplan --debug apply
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"
+
+- name: ip interfaces
+  command: ip a
+  register: stdout
+- debug: msg="{{stdout.stdout_lines}}"

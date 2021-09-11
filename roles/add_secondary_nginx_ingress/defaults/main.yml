@@ -1,0 +1,4 @@
+TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
+
+# microk8s uses 'ingress', but standard nginx manifests use 'ingress-nginx'
+nginx_ns: ingress-nginx

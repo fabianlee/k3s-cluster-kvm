@@ -1,0 +1,152 @@
+---
+
+- name: disable Ubuntu auto-update
+  copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      APT::Periodic::Update-Package-Lists "0";
+      APT::Periodic::Unattended-Upgrade "0";
+
+# 'sysctl' requires ansible.posix collection defined in playbook_ansible_dependencies.yml
+- name: OS swappiness
+  sysctl:
+    name: vm.swappiness
+    value: '5'
+    sysctl_set: true
+    state: present
+
+- name: IPv4 forward
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: yes
+
+- name: install list of packages, debian based
+  apt:
+    pkg:
+    - net-tools # netstat
+    - jq # json tool
+    - vim
+    - curl
+    - whois
+    - zip
+    - unzip
+    - ntpdate
+    - netcat
+    - traceroute
+    - python-is-python3
+    state: present
+    update_cache: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  register: apt_install
+  retries: 3
+  delay: 60
+  until: apt_install is success or ('Unable to acquire the dpkg frontend lock' not in apt_install.msg)
+
+- name: install python3 packages
+  apt:
+    pkg:
+    - python3
+    - python3-pip
+    - python3-setuptools
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  register: apt_install
+  retries: 3
+  delay: 60
+  until: apt_install is success or ('Unable to acquire the dpkg frontend lock' not in apt_install.msg)
+
+- name: install required pip3 dependencies
+  become: yes
+  pip:
+    name:
+      - openshift
+      - pyyaml
+      - #kubernetes
+    executable: pip3
+    #extra_args: --upgrade pip
+
+- name: soft limit for nofile
+  pam_limits:
+    domain: '*'
+    limit_type: soft
+    limit_item: nofile
+    value: "{{ limit_nofile | int }}"
+
+- name: hard limit for nofile
+  pam_limits:
+    domain: '*'
+    limit_type: hard
+    limit_item: nofile
+    value: "{{ limit_nofile | int }}"
+
+- name: set swapoff
+  shell: swapoff -a
+
+- name: set swapoff permanently
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+    backup: yes
+
+- name: update editor preferences, Ubuntu
+  command: /usr/bin/update-alternatives --set editor /usr/bin/vim.basic
+  register: command_result
+  changed_when: "command_result.stdout != ''"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+#- debug: msg="{{command_result}}"
+
+#- name: update python preferences, Ubuntu
+#  command: update-alternatives --install /usr/bin/python python /usr/bin/python3 20
+#  register: command_result
+#  changed_when: "command_result.stdout != ''"
+#  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+#- debug: msg="{{command_result}}"
+
+- name: vimrc skeleton
+  copy:
+    dest: /etc/skel/.vimrc
+    content: |
+      colorscheme desert
+      syntax on
+      set paste
+      set ruler
+      autocmd FileType python setlocal ts=4 sts=4 sw=4 expandtab number autoindent
+      autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab autoindent
+      set foldenable
+      set foldlevelstart=20
+      set foldmethod=indent
+      nnoremap <space> za
+
+- name: add local /etc/hosts entries for all in cluster
+  include_role:
+    name: local-etc-hosts
+    tasks_from: etc-hosts.yml
+
+- name: make sure .kube directory is created for user
+  file:
+    state: directory
+    path: /home/{{ item }}/.kube
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0750"
+    recurse: true
+  loop: "{{ users }}"
+
+- name: default .bash_profile
+  copy:
+    dest: "/home/ubuntu/.bash_profile"
+    owner: ubuntu
+    group: ubuntu
+    mode: 0664
+    content: |
+      export KUBECONFIG=/home/ubuntu/.kube/config
+      alias lsl='ls -latr'
+      export EDITOR=vim
+      export VISUAL=vim

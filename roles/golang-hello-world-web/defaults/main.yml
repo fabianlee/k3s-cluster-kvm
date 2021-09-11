@@ -1,0 +1,10 @@
+TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
+
+# 'nginx' for default manifests, 'public' for microk8s 1.20+
+ingress_class: nginx
+
+# whether ingress redirects http to https, or allows http access
+ssl_redirect: false
+
+# whether to deploy second nginx ingress
+do_second_ingress: true

@@ -1,0 +1,14 @@
+---
+
+- hosts: master
+  gather_facts: yes
+  become: no
+  tags:
+    - ingress
+
+  roles:
+    - role: k3s-metallb
+    - role: add_primary_nginx_ingress
+    - role: add_secondary_nginx_ingress
+    - { role: golang-hello-world-web, do_second_ingress: true }
+

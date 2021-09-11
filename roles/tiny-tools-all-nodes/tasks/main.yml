@@ -1,0 +1,29 @@
+---
+
+- name: check kubectl
+  become: yes
+  command: kubectl get nodes
+  register: getnodes
+- debug: msg="{{getnodes.stdout_lines}}"
+
+- name: get node count
+  shell: kubectl get nodes | grep Ready | wc -l
+  register: node_count
+- debug: 
+    msg: "total k8s worker node count = {{node_count.stdout}}"
+
+- name: copy tiny-tools yaml to remote host
+  copy:
+    src: tiny-tools-daemonset.yaml
+    dest: "{{TMPDIR}}/tiny-tools-daemonset.yaml"
+    force: true
+
+- name: apply tiny-tools as daemonset
+  shell: kubectl apply -f {{TMPDIR}}/tiny-tools-daemonset.yaml
+  become: yes
+  register: stdout
+  retries: 3
+  delay: 15
+  until: stdout.rc == 0
+- debug: msg="{{stdout.stdout_lines}}"
+

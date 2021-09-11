@@ -1,0 +1,14 @@
+TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
+
+istio_ingressgateway_primary_name: istio-ingressgateway
+istio_ingressgateway_primary_selector: ingressgateway
+
+istio_ingressgateway_secondary_name: istio-ingressgateway-secondary
+istio_ingressgateway_secondary_selector: ingressgateway-secondary
+
+# whether to recreate k8s level tls secret
+tls_secret_overwrite: no
+
+# whether istio ingress gateway ClusterIP are accessed from localhost
+# or remotely on microk8s host
+istio_ingress_tested_from_localhost: false

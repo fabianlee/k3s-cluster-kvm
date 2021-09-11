@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet #Deployment
+metadata:
+  name: tiny-tools-ds
+  # allow for override: kubectl -n <ns> apply ...
+  #namespace: default
+  labels:
+    app: tiny-tools
+spec:
+  selector:
+    matchLabels:
+      app: tiny-tools
+  # for Deployment !!!
+  # kubectl scale --replicas=x deployment/tiny-tools
+  #replicas: 1
+  updateStrategy:
+    # 'OnDelete' mimics older 1.5 functionality where manual pod deletion does update
+    type: OnDelete # RollingUpdate
+    #rollingUpdate:
+    #  maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: tiny-tools
+      # avoid istio envy project if being auto-injected
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+# for Deployment!!!
+#      affinity:
+#        podAntiAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#          - labelSelector:
+#              matchExpressions:
+#              - key: app
+#                operator: In
+#                values:
+#                - tiny-tools
+#            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: tiny-tools
+        image: giantswarm/tiny-tools:3.12
+        args:
+        - /bin/sh
+        - -c
+        - touch /tmp/healthy; date; echo "starting..."; sleep 30d
+        livenessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

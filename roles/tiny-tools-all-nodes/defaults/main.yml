@@ -1,0 +1,1 @@
+TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"

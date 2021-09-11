@@ -1,0 +1,61 @@
+<mxfile host="app.diagrams.net" modified="2021-08-01T02:27:49.021Z" agent="5.0 (X11)" etag="6kzN8B1bnrPml_0Fh-5l" version="14.7.7" type="github">
+  <diagram id="h_kEZvT0_YcyKvdCwkHj" name="Page-1">
+    <mxGraphModel dx="924" dy="666" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-12" value="" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="430" y="170" width="130" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-11" value="" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="257" y="170" width="130" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-10" value="" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="80" y="170" width="130" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-8" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="60" y="162" width="510" height="198" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-1" value="" style="html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];shape=mxgraph.kubernetes.icon;prIcon=master" parent="1" vertex="1">
+          <mxGeometry x="120" y="190" width="50" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-2" value="" style="html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];shape=mxgraph.kubernetes.icon;prIcon=node" parent="1" vertex="1">
+          <mxGeometry x="297" y="190" width="50" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-3" value="" style="html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];shape=mxgraph.kubernetes.icon;prIcon=node" parent="1" vertex="1">
+          <mxGeometry x="470" y="190" width="50" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-4" value="&lt;div align=&quot;center&quot;&gt;microk8s-1&lt;/div&gt;&lt;div align=&quot;center&quot;&gt;192.168.122.210&lt;br&gt;&lt;/div&gt;&lt;div align=&quot;center&quot;&gt;(master)&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="125" y="253" width="40" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-6" value="&lt;div align=&quot;center&quot;&gt;microk8s-2&lt;/div&gt;&lt;div align=&quot;center&quot;&gt;192.168.122.211&lt;br&gt;&lt;/div&gt;&lt;div align=&quot;center&quot;&gt;(node)&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="302" y="233" width="40" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-7" value="&lt;div align=&quot;center&quot;&gt;microk8s-3&lt;/div&gt;&lt;div align=&quot;center&quot;&gt;192.168.122.212&lt;br&gt;&lt;/div&gt;&lt;div align=&quot;center&quot;&gt;(node)&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="480" y="234" width="40" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-13" value="NIC" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="90" y="120" width="40" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-14" value="NIC" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="160" y="120" width="40" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-15" value="KVM Default Network 192.168.122.0/24" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="80" y="322" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-16" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="60" y="40" width="510" height="93" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-17" value="&lt;div&gt;Host Network&lt;/div&gt;&lt;div&gt;192.168.x.0/24&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="80" y="60" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-18" value="&lt;div style=&quot;font-size: 10px;&quot; align=&quot;center&quot;&gt;192.168.x.141&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="95" y="100" width="40" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Z65T4Vw5NKFP5OrjWW3G-21" value="&lt;div style=&quot;font-size: 10px&quot; align=&quot;center&quot;&gt;192.168.x.142&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="165" y="100" width="40" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

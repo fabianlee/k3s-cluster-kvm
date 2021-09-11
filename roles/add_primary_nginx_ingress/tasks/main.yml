@@ -1,0 +1,25 @@
+---
+
+- name: get nginx ingress manifest
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/baremetal/deploy.yaml
+    dest: ./nginx-deploy.yaml
+    mode: '0666'
+
+- name: replace 'NodePort' with 'LoadBalancer'
+  replace:
+    path: ./nginx-deploy.yaml
+    regexp: '  type: NodePort'
+    replace: '  type: LoadBalancer'
+
+- name: replace 'Deployment' with 'DaemonSet'
+  replace:
+    path: ./nginx-deploy.yaml
+    regexp: 'kind: Deployment'
+    replace: 'kind: DaemonSet'
+
+- name: apply nginx ingress manifest
+  k8s:
+    state: present
+    #kubeconfig: "{{kubeconfig}}"
+    src: ./nginx-deploy.yaml

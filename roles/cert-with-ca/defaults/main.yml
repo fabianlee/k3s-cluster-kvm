@@ -1,0 +1,10 @@
+TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
+LOCALDIR: "/tmp"
+
+# default name for CA
+cert_CA: myCA
+
+# overwrite if certs already exist?
+cert_overwrite: no
+# overwrite CA if it already exists?
+ca_overwrite: false

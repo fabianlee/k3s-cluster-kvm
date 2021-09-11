@@ -1,0 +1,17 @@
+---
+
+- name: show ansible tags
+  debug: msg="{{ ansible_run_tags|default('') }}"
+  tags: always
+
+- name: apply helloworld istio example
+  import_tasks: apply.yml
+  tags: 
+    - apply
+    - never
+
+- name: delete helloworld istio example
+  import_tasks: delete.yml
+  tags: 
+    - delete
+    - never

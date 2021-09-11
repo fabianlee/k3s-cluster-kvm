@@ -1,0 +1,34 @@
+---
+
+- name: get latest k9s release
+  uri: 
+    url: https://api.github.com/repos/derailed/k9s/releases/latest
+    body_format: json
+    return_content: yes
+  register: k9sversion
+
+- debug:
+    msg: "latest version: {{k9sversion.json.tag_name}}"
+
+- name: download latest k9s
+  get_url:
+    #example: https://github.com/derailed/k9s/releases/download/v0.24.13/k9s_Linux_x86_64.tar.gz
+    url: https://github.com/derailed/k9s/releases/download/{{k9sversion.json.tag_name}}/k9s_Linux_x86_64.tar.gz
+    dest: /tmp
+    mode: 666
+
+- name: extract k9s 
+  unarchive:
+    src: /tmp/k9s_Linux_x86_64.tar.gz
+    remote_src: yes
+    dest: /tmp
+
+- name: move k9s binary to PATH
+  copy:
+    src: /tmp/k9s
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: 775
+
+
+
