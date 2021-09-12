@@ -26,7 +26,7 @@ if [[ ! $target_network == *\. ]]; then
 fi
 
 echo "Replacing $source_network with $target_network in relevant files..."
-for file in tf-libvirt/terraform.tfvars group_vars/microk8s_HA group_vars/microk8s; do 
+for file in tf-libvirt/terraform.tfvars group_vars/master group_vars/k3s_cluster; do 
   #echo "doing replacement in $file"
   set -ex
   sed -i "s/$source_network/$target_network/g" $file
