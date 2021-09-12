@@ -32,7 +32,7 @@
     - role: additional-netplan-ip
     - { role: k3s-get-kubeconfig-local, tags: ['kubeconfig'] }
     - role: cert-with-ca
-    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default'] }
+    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default' ] }
     - role: k9s
 
 - hosts: master

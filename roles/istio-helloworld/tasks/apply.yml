@@ -1,15 +1,5 @@
 ---
 
-- name: applying...
-  debug: msg="applying...."
-
-- name: create kubectl config
-  become: yes
-  changed_when: true
-  shell: microk8s config > ~/.kube/config
-  args:
-    executable: /bin/bash
-
 - name: check kubectl
   become: yes
   command: kubectl get nodes

@@ -9,6 +9,7 @@
 - name: create .kube directory for ubuntu
   file:
     path: /home/ubuntu/.kube
+    state: directory
     owner: ubuntu
     mode: 0775
 
@@ -16,6 +17,7 @@
   become: yes
   file:
     path: /root/.kube
+    state: directory
     mode: 0775
 
 - name: copy k3s.yaml to standard .kube/config location for ubuntu

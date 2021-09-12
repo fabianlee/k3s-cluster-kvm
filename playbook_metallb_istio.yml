@@ -11,14 +11,18 @@
     istio_ingress_tested_from_localhost: true
 
   roles:
+    # public LB endpoints
     - role: k3s-metallb
 
     # istio operator (istio-operator) and primary+secondary ingress gateway services (istio-system)
     - role: istio-operator
 
-    # istio gateways (default)
+    # istio gateways (primary and secondary)
     - role: istio-gateway
 
-    # deploys hello world to primary and secondary
+    # put TLS secret into 'istio-system' namespace also
+    - { role: apply-k8s-tls-secrets, tags: ['secrets'], secret_namespace_list: [ 'default','istio-system'] }
+
+    # deploys hello world apps, projected unto primary and secondary gateway
     - role: istio-helloworld
 
