@@ -61,14 +61,14 @@
   delay: 60
   until: apt_install is success or ('Unable to acquire the dpkg frontend lock' not in apt_install.msg)
 
-- name: install required pip3 dependencies
+- name: install required pip3 dependencies for ansible galaxy kubernetes modules
   become: yes
   pip:
     name:
       - openshift
       - pyyaml
-      - #kubernetes
     executable: pip3
+    # not necessary to use extra_args
     #extra_args: --upgrade pip
 
 - name: soft limit for nofile
@@ -150,3 +150,9 @@
       alias lsl='ls -latr'
       export EDITOR=vim
       export VISUAL=vim
+
+- name: open ufw port for k3s master/worker communication
+  ufw: rule=allow port={{item}} proto=tcp
+  loop:
+    - "6443"
+    - "443"

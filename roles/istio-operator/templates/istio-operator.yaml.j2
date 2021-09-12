@@ -15,29 +15,11 @@ spec:
   revision: "{{ istio_version | replace('.','-') }}"
 
   # avoid rate limit on docker hub for istio envoy proxy
-  # I get pull errors using gcr.io from microk8s (might need gcr secret)
-  # so just allow default docker.io/istio
-  #values:
-  #  global:
-  #    hub: grc.io/istio-release
+  values:
+    global:
+      hub: grc.io/istio-release
 
-  #values:
-    # https://console.cloud.google.com/gcr/images/istio-release/GLOBAL
-    #pilot:
-    #  hub: gcr.io/istio-release/pilot
-    # gcr.io only has single version, not the one we need
-    #prometheus:
-    #  hub: gcr.io/istio-release/prom/promethus
-    # only on quay
-    #kiali:
-    #  hub:
   addonComponents:
-    kiali:
-      enabled: false
-    grafana:
-      enabled: false
-    prometheus:
-      enabled: false
     pilot:
       enabled: true
 
