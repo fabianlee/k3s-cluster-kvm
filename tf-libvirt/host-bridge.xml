@@ -1,0 +1,5 @@
+<network>
+  <name>host-bridge</name>
+  <forward mode="bridge"/>
+  <bridge name="br0"/>
+</network>

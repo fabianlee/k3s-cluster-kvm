@@ -1,8 +1,12 @@
 THISDIR := $(notdir $(CURDIR))
 PROJECT := $(THISDIR)
+# system connection, in case LIBVIRT_DEFAULT_URI env var is not defined
+LIBVIRT_URI := qemu:///system
 TF := terraform
 
 apply: init 
+	@echo Making sure libvirt pool 'default' exists
+	virsh --connect $(LIBVIRT_URI) pool-info default
 	$(TF) apply -auto-approve
 
 init: create-keypair
@@ -24,7 +28,8 @@ refresh:
 	$(TF) output
 
 libvirt-pool:
-	$(eval POOLDIR=$(shell virsh pool-dumpxml default | grep -E "<path>.*</path>" | grep -Po "(?<=\>)[^<]+"))
+	$(eval POOLDIR=$(shell virsh --connect ${LIBVIRT_URI} pool-dumpxml default | grep -E "<path>.*</path>" | grep -Po "(?<=\>)[^<]+"))
+	@echo POOLDIR is $(POOLDIR)
 
 ## validate syntax of cloud_init
 validate-cloud-config:

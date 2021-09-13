@@ -29,7 +29,7 @@ resource "null_resource" "extend_primary_volume" {
     command = <<EOF
       echo "going to wait 10 seconds before trying to increment disk size by ${each.value.incGB}GB"
       sleep 10
-      poolPath=$(virsh pool-dumpxml ${var.diskPool} | grep -Po '<path>\K[^<]+')
+      poolPath=$(virsh --connect ${var.qemu_connect} pool-dumpxml ${var.diskPool} | grep -Po '<path>\K[^<]+')
       sudo qemu-img resize $poolPath/${each.key}.qcow2 +${each.value.incGB}G
     EOF
   }
@@ -69,10 +69,14 @@ data "template_file" "network_config" {
   }
 }
 
-# uses bridged network from host
+#
+# bridged libvirt networks needs to be created outside of terraform
+# see here: https://fabianlee.org/2019/04/01/kvm-creating-a-bridged-network-with-netplan-on-ubuntu-bionic/
+# uses OS level bridge network 'br0' to create libvirt 'host-bridge' network
 # https://www.desgehtfei.net/en/quick-start-kvm-libvirt-vms-with-terraform-and-ansible-part-1-2/
-#resource "libvirt_network" "vmbridge" {
-#  name = "vmbridge"
+#
+#resource "libvirt_network" "host_bridge" {
+#  name = "host-bridge"
 #  # nat|none|route|bridge
 #  mode = "bridge"
 #
@@ -134,13 +138,3 @@ resource "libvirt_domain" "domain-ubuntu" {
   }
 }
 
-output "hosts_1_network" {
-  value = libvirt_domain.domain-ubuntu["k3s-1"].network_interface[*]
-}
-output "hosts" {
-  # output does not support 'for_each', so use zipmap as workaround
-  value = zipmap( 
-                values(libvirt_domain.domain-ubuntu)[*].name,
-                values(libvirt_domain.domain-ubuntu)[*].vcpu
-                )
-}

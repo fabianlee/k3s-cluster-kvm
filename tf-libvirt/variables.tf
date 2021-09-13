@@ -12,3 +12,5 @@ variable "diskPool" { default = "default" }
 variable "additional_nic1" { }
 variable "additional_nic2" { }
 
+variable "qemu_connect" { default="qemu:///system" }
+

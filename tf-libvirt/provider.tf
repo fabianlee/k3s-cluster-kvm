@@ -11,6 +11,7 @@ terraform {
 
 # instance of the provider
 provider "libvirt" {
+  # ensures system connection, not userspace qemu:///session
   uri = "qemu:///system"
 }
 
