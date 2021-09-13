@@ -7,17 +7,16 @@ metadata:
     # matches ingress-class arg at: 
     #   roles/add_secondary_ingress/templates/nginx-ingress-secondary-microk8s-controller.yaml.j2
     kubernetes.io/ingress.class: secondary
-
     # allows http without forcing redirect to ssl
-    nginx.ingress.kubernetes.io/ssl-redirect: "{{ ssl_redirect|lower }}"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   tls:
-  - hosts: {{ cert_domains_secondary_ingress | to_json }}
+  - hosts: k3s-secondary.local
     # secret must be in same namespace
     secretName: tls-secondary-credential
   rules:
 
-  - host: {{ cert_domains_secondary_ingress | first }}
+  - host: k3s-secondary.local
     http:
       paths:
       - pathType: Prefix #Exact
