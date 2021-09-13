@@ -7,7 +7,7 @@ metadata:
   annotations:
     # https://github.com/ubuntu/microk8s/issues/2035
     # 'nginx' is default for nginx manifests, microk8s changed default to 'public' at microk8s 1.20
-    kubernetes.io/ingress.class: ingress-nginx
+    kubernetes.io/ingress.class: nginx
 
     # allows http without forcing redirect to ssl
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
