@@ -14,7 +14,7 @@ metadata:
 
 spec:
   tls:
-  - hosts: k3s.local
+  - hosts: [ 'k3s.local' ]
     # secret must be in same namespace
     secretName: tls-credential
   rules:
