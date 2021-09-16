@@ -17,6 +17,7 @@ spec:
   # avoid rate limit on docker hub for istio envoy proxy
   values:
     global:
+      # will fail unless on GKE or have pull secret
       #hub: grc.io/istio-release
 
   addonComponents:
