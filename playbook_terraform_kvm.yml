@@ -1,6 +1,6 @@
 ---
 
-# ubuntu prereq and install k9s gui
+# create kvm guest vms
 - hosts: localhost
   gather_facts: yes
   become: no
