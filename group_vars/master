@@ -1,7 +1,7 @@
 ---
 
 # content that needs to go into netplan of first master
-# these NIC should be peers of the host (e.g. 192.168.1.0/24)
+# these NIC should be peers of the physical host
 additional_nic:
   - id: ens4
     netplan:

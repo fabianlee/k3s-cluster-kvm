@@ -1,4 +1,4 @@
-# k3s with primary and secondary nginx ingress
+# k3s with primary and secondary nginx or istio ingress
 
 Create infrastructure
   * cd tf-libvirt
@@ -8,18 +8,23 @@ Create infrastructure
 Then apply Ansible roles:
   * ansible-playbook install_dependencies.yml
   * ansible-playbook playbook_k3s.yml
+
+Choose between MetalLB+nginx or MetalLB+istio ingress
   * ansible-playbook playbook_metallb_nginx.yml
+  * ansible-playbook playbook_metallb_istio.yml
 
 Validate kubectl locally:
-  * export KUBECONFIG=/tmp/microk8s-kubeconfig
-  * kubectl get services -n ingress-nginx
+  * export KUBECONFIG=/tmp/k3s-kubeconfig
+  * kubectl get services -A
 
 Validate ingress locally:
   * add entries to local /etc/hosts
     192.168.2.143 k3s.local
     192.168.2.144 k3s-secondary.local
-  * test primary ingress
-    curl -k https://k3s.local/myhello/
-  * test secondary ingress
-    curl -k https://k3s-secondary.local/myhello2/
+
+  * test nginx ingress
+    ./test-nginx-endpoints.sh
+
+  * test istio ingress
+    ./test-istio-endpoints.sh
 
