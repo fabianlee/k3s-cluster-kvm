@@ -4,14 +4,11 @@ PROJECT := $(THISDIR)
 LIBVIRT_URI := qemu:///system
 TF := terraform
 
-apply: init 
-	@echo Making sure libvirt pool 'default' exists
-	virsh --connect $(LIBVIRT_URI) pool-info default
+apply: init libvirt-prereq
 	$(TF) apply -auto-approve
 
 init: create-keypair
-	# skips init if .terraform directory already exists
-	[ -d .$(TF) ] || $(TF) init
+	$(TF) init
 
 destroy:
 	$(TF) destroy -auto-approve
@@ -26,6 +23,16 @@ create-keypair:
 refresh:
 	$(TF) refresh
 	$(TF) output
+
+libvirt-prereq:
+	@echo Making sure libvirt default disk pool and network exist
+	virsh --connect $(LIBVIRT_URI) pool-info default
+	virsh --connect $(LIBVIRT_URI) net-info default
+
+	@echo Making sure virtual bridge 'br0' exists on host
+	ip a show br0
+	@echo Making sure libvirt 'host-bridge' exists that uses 'br0' host bridge
+	virsh --connect $(LIBVIRT_URI) net-info host-bridge
 
 libvirt-pool:
 	$(eval POOLDIR=$(shell virsh --connect ${LIBVIRT_URI} pool-dumpxml default | grep -E "<path>.*</path>" | grep -Po "(?<=\>)[^<]+"))
