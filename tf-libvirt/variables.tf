@@ -8,9 +8,9 @@ variable "prefixIP" { default = "192.168.122" }
 # kvm disk pool name
 variable "diskPool" { default = "default" }
 
-# additional nics on microk8s-1
-variable "additional_nic1" { }
-variable "additional_nic2" { }
+# additional nics on k3s-1
+variable "additional_nic1" { default="192.168.1.143" }
+variable "additional_nic2" { default="192.168.1.144" }
 
 variable "qemu_connect" { default="qemu:///system" }
 
