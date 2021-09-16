@@ -4,8 +4,6 @@
 - hosts: k3s_cluster
   gather_facts: yes
   become: yes
-  tags:
-    - prereq
   roles:
     - k3s-prereq
 
@@ -30,7 +28,7 @@
   become: yes
   roles:
     - role: additional-netplan-ip
-    - { role: k3s-get-kubeconfig-local, tags: ['kubeconfig'] }
+    - { role: k3s-get-kubeconfig-local }
     - role: cert-with-ca
     - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default' ] }
     - role: k9s
