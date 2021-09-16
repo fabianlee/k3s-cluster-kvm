@@ -21,7 +21,7 @@
     - role: istio-gateway
 
     # put TLS secret into 'istio-system' namespace also
-    - { role: apply-k8s-tls-secrets, tags: ['secrets'], secret_namespace_list: [ 'default','istio-system'] }
+    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default','istio-system'] }
 
     # deploys hello world apps, projected unto primary and secondary gateway
     - role: istio-helloworld
