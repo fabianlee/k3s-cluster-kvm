@@ -1,9 +1,10 @@
 # k3s with primary and secondary nginx or istio ingress
 
+Modify variables for environment
+  * vi group_vars/all
+
 Create infrastructure
-  * cd tf-libvirt
-  * make
-  * cd ..
+  * ansible-playbook playbook_terraform.yml
 
 Then apply Ansible roles:
   * ansible-playbook install_dependencies.yml
