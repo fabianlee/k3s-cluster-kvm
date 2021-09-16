@@ -6,23 +6,23 @@ additional_nic:
   - id: ens4
     netplan:
       addresses:
-      - {{metal_lb_primary}}/24
+      - "{{metal_lb_primary}}/24"
       dhcp4: false
-      gateway4: {{metal_lb_prefix}}.1
+      gateway4: "{{metal_lb_prefix}}.1"
       nameservers:
         addresses:
-        - {{metal_lb_prefix}}.1
+        - "{{metal_lb_prefix}}.1"
         search:
         - home.lab
   - id: ens5
     netplan: 
       addresses:
-      - {{metal_lb_secondary}}/24
+      - "{{metal_lb_secondary}}/24"
       dhcp4: false
-      gateway4: {{metal_lb_prefix}}.1
+      gateway4: "{{metal_lb_prefix}}.1"
       nameservers:
         addresses:
-        - {{metal_lb_prefix}}.1
+        - "{{metal_lb_prefix}}.1"
         search:
         - home.lab
 
