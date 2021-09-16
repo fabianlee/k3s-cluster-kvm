@@ -5,3 +5,6 @@ id_rsa*
 *.backup
 *.hcl
 
+# generated from .j2
+terraform.tfvars
+

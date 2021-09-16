@@ -74,4 +74,22 @@
         creates: "{{playbook_dir}}/../collections/ansible_collections/community/general"
         chdir: "{{playbook_dir}}/../collections"
 
+    # https://docs.ansible.com/ansible/latest/collections/community/libvirt/virt_net_module.html
+    # required for 'community.libvirt' collection to work
+    - name: install local packages needed for community.libvirt
+      delegate_to: localhost
+      become: yes
+      apt:
+        pkg:
+        - python3-libvirt
+        - python3-lxml
+        state: present
+
+    - name: get community.libvirt collection from ansible galaxy, be patient can take 5 minutes
+      command:
+        cmd: ansible-galaxy collection install community.libvirt:1.0.2 -p .
+        creates: "{{playbook_dir}}/../collections/ansible_collections/community/libvirt"
+        chdir: "{{playbook_dir}}/../collections"
+
+
 

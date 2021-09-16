@@ -1,14 +1,4 @@
 ---
-# for SAN certificate with custom CA
-cert_CA: myCA.local
-cert_domains_primary_ingress: ['k3s.local','k3s-alt.local']
-cert_domains_secondary_ingress: ['k3s-secondary.local']
-#cert_overwrite: yes
-#tls_secret_overwrite: true
-
-metal_lb_prefix: 192.168.2
-metal_lb_primary: {{metal_lb_prefix}}.143
-metal_lb_secondary: {{metal_lb_prefix}.144
 
 # content that needs to go into netplan of first master
 # these NIC should be peers of the host (e.g. 192.168.1.0/24)

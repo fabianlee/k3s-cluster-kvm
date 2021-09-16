@@ -1,0 +1,9 @@
+---
+
+# ubuntu prereq and install k9s gui
+- hosts: localhost
+  gather_facts: yes
+  become: no
+
+  roles:
+     - role: terraform_create_kvm_hosts

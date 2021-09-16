@@ -1,0 +1,42 @@
+
+
+- name: create terraform.tfvars from template
+  delegate_to: localhost
+  become: no
+  template:
+    src: "{{playbook_dir}}/tf-libvirt/terraform.tfvars.j2"
+    dest: "{{playbook_dir}}/tf-libvirt/terraform.tfvars"
+    mode: 0666
+
+- name: make sure 'br0' host bridge exists
+  command:
+    cmd: ip a show br0
+
+- name: make sure kvm network 'host-bridge' exists that uses br0
+  community.libvirt.virt_net:
+    command: get_xml
+    name: host-bridge
+  register: res
+- debug: msg="{{res}}"
+
+- name: make sure kvm network 'default' exists
+  community.libvirt.virt_net:
+    command: get_xml
+    name: default
+  register: res
+- debug: msg="{{res}}"
+
+- name: make sure disk pool 'default' exists
+  community.libvirt.virt_pool:
+    command: get_xml
+    name: default
+  register: res
+- debug: msg="{{res}}"
+
+- name: Makefile running terraform apply
+  command:
+    cmd: make
+    chdir: "{{playbook_dir}}/tf-libvirt"
+  register: run_make
+- debug: msg="{{run_make.stdout_lines}}"
+

@@ -11,4 +11,31 @@ master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['m
 extra_server_args: " --disable servicelb --disable traefik" # so that klipper is disabled, and metalLB can be used
 extra_agent_args: ""
 
+# for SAN certificate with custom CA
+cert_CA: myCA.local
+cert_domains_primary_ingress: ['k3s.local','k3s-alt.local']
+cert_domains_secondary_ingress: ['k3s-secondary.local']
+#cert_overwrite: yes
+#tls_secret_overwrite: true
 
+metal_lb_prefix: 192.168.2
+metal_lb_primary: "{{metal_lb_prefix}}.143"
+metal_lb_secondary: "{{metal_lb_prefix}}.144"
+
+# configure these users with proper: group, permissions, ~/.kube/config
+users: ['ubuntu'] # 'fabian' for virtualbox, 'ubuntu' for kvm/libvirt
+
+# place in /etc/hosts of each
+local_etc_hosts:
+  # cluster nodes must see each other
+  - ip: 192.168.122.213
+    fqdn: k3s-1
+  - ip: 192.168.122.214
+    fqdn: k3s-2
+  - ip: 192.168.122.215
+    fqdn: k3s-3
+  # allows curl to MetalLB endpoints with proper host header
+  - ip: "{{metal_lb_prefix}}.143"
+    fqdn: k3s.local
+  - ip: "{{metal_lb_prefix}}.144"
+    fqdn: k3s-secondary.local
