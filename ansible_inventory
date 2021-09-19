@@ -7,8 +7,8 @@ k3s-3 ansible_host=192.168.122.215
 k3s-1
 
 [node]
-k3s-2
-k3s-3
+#k3s-2
+#k3s-3
 
 [k3s_cluster:children]
 master

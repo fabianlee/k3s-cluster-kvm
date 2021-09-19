@@ -1,0 +1,41 @@
+---
+
+- command: kubectl get service istio-ingressgateway -n istio-system --output jsonpath='{.spec.clusterIP}'
+  register: primary_clusterIP
+- command: kubectl get service istio-ingressgateway-secondary -n istio-system --output jsonpath='{.spec.clusterIP}'
+  register: secondary_clusterIP
+- debug: msg="ClusterIP primary/secondary {{":"}} {{primary_clusterIP.stdout}}/{{secondary_clusterIP.stdout}}"
+
+- command: kubectl get service istio-ingressgateway -n istio-system --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: primary_lbIP
+- command: kubectl get service istio-ingressgateway-secondary -n istio-system --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: secondary_lbIP
+- debug: msg="LB primary/secondary {{":"}} {{primary_lbIP.stdout}}/{{secondary_lbIP.stdout}}"
+
+- name: copy istio gateway test to remote host
+  copy:
+    src: test-istio-gateway.sh
+    dest: "{{TMPDIR}}/test-istio-gateway.sh"
+    mode: '0755'
+
+- debug: 
+    msg: "test-istio-gateway.sh {{primary_lbIP.stdout}} {{cert_domains_primary_ingress|join(',')}} {{secondary_lbIP.stdout}} {{cert_domains_secondary_ingress|join(',') }}"
+
+- block:
+    - name: test pulling pages from primary and secondary ingress gateways, from localhost
+      delegate_to: localhost
+      command: "{{role_path}}/files/test-istio-gateway.sh {{primary_lbIP.stdout}} {{cert_domains_primary_ingress|join(',')}} {{secondary_lbIP.stdout}} {{cert_domains_secondary_ingress|join(',')}}"
+      register: stdout
+    - debug: msg="{{stdout.stdout_lines}}"
+    - debug: msg="{{stdout.cmd | join(' ') }}"
+  when: istio_ingress_tested_from_localhost
+
+- block:
+    - name: test pulling pages from primary and secondary ingress gateways, from target host
+      command: "{{TMPDIR}}/test-istio-gateway.sh {{primary_clusterIP.stdout}} {{cert_domains_primary_ingress|join(',')}} {{secondary_clusterIP.stdout}} {{cert_domains_secondary_ingress|join(',')}}"
+      register: stdout
+      when: not istio_ingress_tested_from_localhost
+
+    - debug: msg="{{stdout.stdout_lines}}"
+    - debug: msg="{{stdout.cmd | join(' ') }}"
+  when: not istio_ingress_tested_from_localhost

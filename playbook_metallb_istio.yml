@@ -12,17 +12,23 @@
 
   roles:
     # public LB endpoints
-    - role: k3s-metallb
+    #- role: k3s-metallb
 
     # istio operator (istio-operator) and primary+secondary ingress gateway services (istio-system)
-    - role: istio-operator
+    #- role: istio-operator
 
     # istio gateways (primary and secondary)
-    - role: istio-gateway
+    #- role: istio-gateway
 
     # put TLS secret into 'istio-system' namespace also
-    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default','istio-system'] }
+    #- { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default','istio-system'] }
 
     # deploys hello world apps, projected unto primary and secondary gateway
-    - role: istio-helloworld
+    #- role: istio-helloworld
+
+  tasks:
+  - name: run tests against gateways
+    include_role:
+      name: istio-gateway
+      tasks_from: test.yml
 
