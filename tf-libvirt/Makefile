@@ -30,6 +30,7 @@ libvirt-prereq:
 	virsh --connect $(LIBVIRT_URI) net-info default
 
 	@echo Making sure virtual bridge 'br0' exists on host
+        @echo https://fabianlee.org/2019/04/01/kvm-creating-a-bridged-network-with-netplan-on-ubuntu-bionic/
 	ip a show br0
 	@echo Making sure libvirt 'host-bridge' exists that uses 'br0' host bridge
 	virsh --connect $(LIBVIRT_URI) net-info host-bridge
