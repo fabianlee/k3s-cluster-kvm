@@ -8,6 +8,7 @@
   community.crypto.openssl_privatekey:
     path: "{{TMPDIR}}/{{cert_CA}}.key"
     force: "{{ca_overwrite}}"
+    regenerate: full_idempotence
   register: ca_key
 
 - name: create the CA CSR

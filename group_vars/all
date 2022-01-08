@@ -3,7 +3,8 @@ ansible_python_interpreter: /usr/bin/python3
 
 # https://github.com/rancher/k3s/releases/latest
 # https://github.com/k3s-io/k3s/releases/tag/v1.21.4+k3s1
-k3s_version: v1.21.4+k3s1
+# https://github.com/k3s-io/k3s/releases/tag/v1.21.8+k3s1
+k3s_version: v1.21.8+k3s1
 
 metal_lb_prefix: 192.168.2
 metal_lb_primary: "{{metal_lb_prefix}}.143"
@@ -17,7 +18,7 @@ extra_agent_args: ""
 
 # for SAN certificate with custom CA
 cert_CA: myCA.local
-cert_domains_primary_ingress: ['k3s.local','k3s-alt.local']
+cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local']
 cert_domains_secondary_ingress: ['k3s-secondary.local']
 
 # configure these users with proper: group, permissions, ~/.kube/config
