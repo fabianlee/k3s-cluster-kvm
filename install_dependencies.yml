@@ -42,15 +42,6 @@
         - python3-netaddr
         state: present
 
-# for community.kubernetes
-# not required on ansible orchestrator, required on execution targets
-#    - name: install pip3 dependencies
-#      delegate_to: localhost
-#      become: yes
-#      pip:
-#        name: openshift pyyaml #kubernetes
-#        executable: pip3
-
     # https://galaxy.ansible.com/ansible/netcommon
     - name: get ansible.netcommon collection from ansible galaxy, be patient can take 5 minutes
       command:
@@ -58,7 +49,7 @@
         creates: "{{playbook_dir}}/../collections/ansible_collections/ansible/netcommon"
         chdir: "{{playbook_dir}}/../collections"
 
-    # sysctl
+    # sysctl and NFS mount
     # https://galaxy.ansible.com/ansible/posix
     - name: get ansible.posix collection from ansible galaxy, be patient can take 5 minutes
       command:

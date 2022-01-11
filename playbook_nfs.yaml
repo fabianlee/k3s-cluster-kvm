@@ -1,0 +1,16 @@
+---
+
+# save IP address of ansible orchestrator, default NFS server
+- hosts: localhost
+  connection: local
+  tasks:
+    - set_fact:
+        hostvm_ip: "{{ hostvm_ip | default(ansible_default_ipv4.address) }}"
+    - debug: msg="{{hostvm_ip}}"
+
+- hosts: k3s_cluster
+  gather_facts: yes
+  become: yes
+  roles:
+    - nfs-client
+

@@ -1,0 +1,28 @@
+---
+
+- name: install nfs client packages, debian based
+  apt:
+    pkg:
+    - nfs-common
+    state: present
+    update_cache: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  register: apt_install
+  retries: 3
+  delay: 60
+  until: apt_install is success or ('Unable to acquire the dpkg frontend lock' not in apt_install.msg)
+
+- name: create mount dir
+  file:
+    path: /mnt/nfs1
+    state: directory
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html
+- name: mount remote nfs
+  ansible.posix.mount:
+    src: "{{ nfs_server | default(hostvars['localhost']['hostvm_ip']) }}:/data/nfs1"
+    path: /mnt/nfs1
+    fstype: nfs
+    state: mounted
+    opts: rw,auto
+    boot: yes

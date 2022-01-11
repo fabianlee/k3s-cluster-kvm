@@ -44,15 +44,15 @@ validate-cloud-config:
 	cloud-init devel schema --config-file cloud_init.cfg
 
 virsh-create-snapshot:
-	virsh snapshot-create-as microk8s-1-192.168.122.210 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
-	virsh snapshot-create-as microk8s-2-192.168.122.211 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
-	virsh snapshot-create-as microk8s-3-192.168.122.212 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
+	virsh snapshot-create-as k3s-1-192.168.122.213 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
+	virsh snapshot-create-as k3s-2-192.168.122.214 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
+	virsh snapshot-create-as k3s-3-192.168.122.215 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
 
 virsh-snapshot-delete:
-	virsh destroy microk8s-1-192.168.122.210
-	virsh destroy microk8s-2-192.168.122.211
-	virsh destroy microk8s-3-192.168.122.212
+	virsh destroy k3s-1-192.168.122.213
+	virsh destroy k3s-2-192.168.122.214
+	virsh destroy k3s-3-192.168.122.215
 	sleep 5
-	virsh snapshot-delete microk8s-1-192.168.122.210 adv-test
-	virsh snapshot-delete microk8s-2-192.168.122.211 adv-test
-	virsh snapshot-delete microk8s-3-192.168.122.212 adv-test
+	virsh snapshot-delete k3s-1-192.168.122.213 adv-test
+	virsh snapshot-delete k3s-2-192.168.122.214 adv-test
+	virsh snapshot-delete k3s-3-192.168.122.215 adv-test
