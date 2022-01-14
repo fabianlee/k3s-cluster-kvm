@@ -28,6 +28,7 @@
   become: yes
   roles:
     - role: additional-netplan-ip
+    - role: k3s-fix-master-node-ip
     - { role: k3s-get-kubeconfig-local }
     - role: cert-with-ca
     - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default' ] }

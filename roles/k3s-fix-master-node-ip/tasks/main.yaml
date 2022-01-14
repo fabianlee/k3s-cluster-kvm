@@ -1,0 +1,35 @@
+---
+
+# default returns extra LB IP, and not our primary network interface
+#- debug:
+#    msg: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+- debug:
+    msg: "{{ ansible_ssh_host }}"
+
+- name: is node-ip already at end of line of k3s.service
+  lineinfile:
+    path: /etc/systemd/system/k3s.service
+    regexp: '--node-ip ([^ ]*)$'
+    state: absent # if we used 'present' then it would require 'line'
+  check_mode: yes
+  failed_when: false
+  register: node_ip_not_found
+
+- debug:
+    msg: "{{node_ip_not_found.found}}"
+
+- name: add explicit node-ip to master node so uses default IP and not metalLB endpoints
+  lineinfile:
+    path: /etc/systemd/system/k3s.service
+    backrefs: yes
+    regexp: "^(ExecStart=\/usr\/local\/bin\/k3s) (.*)"
+    line: '\1 \2 --node-ip {{ansible_ssh_host}}'
+  when: node_ip_not_found.found==0
+  register: set_node_ip
+
+- name: reload systemctl daemon if node-ip changed
+  systemd:
+    daemon_reload: true
+    name: k3s
+    state: restarted
+  when: set_node_ip.changed
