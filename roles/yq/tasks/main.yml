@@ -1,0 +1,27 @@
+---
+
+- name: get latest yq release
+  uri: 
+    url: https://api.github.com/repos/mikefarah/yq/releases/latest
+    body_format: json
+    return_content: yes
+  register: yqversion
+
+- debug:
+    msg: "latest version: {{yqversion.json.tag_name}}"
+
+- name: download latest yq
+  get_url:
+    url: https://github.com/mikefarah/yq/releases/download/{{yqversion.json.tag_name}}/yq_linux_amd64
+    dest: /tmp
+    mode: 666
+
+- name: move yq binary to PATH
+  copy:
+    src: /tmp/yq_linux_amd64
+    dest: /usr/local/bin/yq
+    remote_src: yes
+    mode: 775
+
+
+

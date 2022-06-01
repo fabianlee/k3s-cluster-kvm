@@ -1,0 +1,51 @@
+---
+
+# put MetalLB as peer on host network
+- hosts: localhost
+  connection: local
+  tasks:
+    - set_fact:
+        nfs_server_ip: "{{ ansible_default_ipv4.address }}"
+
+- hosts: master
+  gather_facts: yes
+  become: yes
+  become_user: ubuntu
+
+  tasks:
+
+    # helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+    # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
+    - name: Add nfs subdir helm3 repo
+      kubernetes.core.helm_repository:
+        name: nfs-subdir-external-provisioner
+        repo_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+
+    #helm install nfs-subdir-external-provisioner \
+    #nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+    #--set nfs.server=<IP> \
+    #--set nfs.path=/data/nfs1 \
+    #--set storageClass.onDelete=true
+    - name: Deploy nfs subdir provisioner
+      kubernetes.core.helm:
+        name: nfs-subdir-external-provisioner
+        chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
+        wait: false
+        values:
+          nfs:
+            server: "{{ hostvars['localhost'].nfs_server_ip }}"
+            path: /data/nfs1
+          storageClass:
+            onDelete: true
+        release_namespace: default
+        create_namespace: false
+
+    # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/k8s_info_module.html
+    - name: validate storageclass
+      kubernetes.core.k8s_info:
+        api_version: storage.k8s.io/v1
+        kind: StorageClass
+      register: sc_list
+    - debug: msg="{{sc_list}}"
+
+

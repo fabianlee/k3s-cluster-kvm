@@ -40,6 +40,8 @@
     - netcat
     - traceroute
     - python-is-python3
+    - iotop # for analyzing IO issues
+    - nfs-common # for NFS storageclass
     state: present
     update_cache: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

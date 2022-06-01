@@ -1,0 +1,74 @@
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+---
+# helm repo add codecentric https://codecentric.github.io/helm-charts
+# helm show values codecentric/mailhog
+# https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
+- name: Add codecentric repo
+  kubernetes.core.helm_repository:
+    name: codecentric
+    repo_url: https://codecentric.github.io/helm-charts
+
+#helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+- name: Deploy mailhog
+  kubernetes.core.helm:
+    name: mailhog
+    chart_ref: codecentric/mailhog
+    wait: false
+    values: "{{ lookup('template', role_path + '/templates/values.yaml') | from_yaml }}"
+    release_namespace: email
+    create_namespace: true
+
+- name: wait for mailhog deployment to be ready before continuing
+  become_user: ubuntu
+  shell: "kubectl wait deployment -n email mailhog --for condition=Available=True --timeout=10s"
+  retries: 10
+  delay: 30
+  register: kubectl_mailhog_ready
+  until: kubectl_mailhog_ready.rc==0
+
+- name: retrieve mailhog ClusterIP
+  become_user: ubuntu
+  command:
+    cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.clusterIP}"
+  register: mailhog_cluster_ip
+- name: retrieve mailhog SMTP port
+  become_user: ubuntu
+  command:
+    cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.ports[?(@.name=='tcp-smtp')].port}"
+  register: mailhog_smtp_port 
+  
+- set_fact:
+    smtp_host_port: "{{mailhog_cluster_ip.stdout}}:{{mailhog_smtp_port.stdout}}"
+- debug: msg="{{smtp_host_port}}"
+
+
+
+- name: Download tiny-tools-with-swaks manifest
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/fabianlee/tiny-tools-with-swaks/main/k8s-tiny-tools-with-swaks.yaml
+    dest: .
+    mode: '0664'
+- name: email client utility
+  kubernetes.core.k8s:
+    state: present
+    src: k8s-tiny-tools-with-swaks.yaml
+    namespace: default
+  register: swaks_deployed
+- name: wait for tiny-tools-with-swaks deployment to be ready before continuing
+  become_user: ubuntu
+  shell: "kubectl wait deployment -n default tiny-tools-with-swaks --for condition=Available=True --timeout=10s"
+  retries: 10
+  delay: 30
+  register: kubectl_swaks_ready
+  until: kubectl_swaks_ready.rc==0
+
+- name: generate test email
+  command:
+    cmd: 'kubectl exec -it -n default deployment/tiny-tools-with-swaks -- /usr/bin/swaks -f image-test@me -t image@me -s {{mailhog_cluster_ip.stdout}} -p {{mailhog_smtp_port.stdout}} --body "this is a test" --header "Subject: mailhog validation"'
+  register: generate_email
+  when: swaks_deployed.changed
+- debug:
+    msg: "{{generate_email.stdout_lines|default('')}}"
+  when: swaks_deployed.changed
+

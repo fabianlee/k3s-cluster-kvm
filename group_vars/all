@@ -19,7 +19,7 @@ extra_agent_args: ""
 
 # for SAN certificate with custom CA
 cert_CA: myCA.local
-cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local']
+cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local','mailhog.k3s.local']
 cert_domains_secondary_ingress: ['k3s-secondary.local']
 
 # configure these users with proper: group, permissions, ~/.kube/config

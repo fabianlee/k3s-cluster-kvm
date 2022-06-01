@@ -1,0 +1,4 @@
+
+secret_name: tls-credential
+
+cert_domains_list: "{{cert_domains_primary_ingress}}"

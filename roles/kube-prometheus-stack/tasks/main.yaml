@@ -1,0 +1,97 @@
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+---
+
+- name: retrieve mailhog ClusterIP
+  become_user: ubuntu
+  command:
+    cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.clusterIP}"
+  register: mailhog_cluster_ip
+- name: retrieve mailhog SMTP port
+  become_user: ubuntu
+  command:
+    cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.ports[?(@.name=='tcp-smtp')].port}"
+  register: mailhog_smtp_port
+
+- set_fact:
+    smtp_host_port: "{{mailhog_cluster_ip.stdout}}:{{mailhog_smtp_port.stdout}}"
+- debug: msg="{{smtp_host_port}}"
+
+
+
+# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+# helm show values prometheus-community/kube-prometheus-stack | tee prom-stack.yaml
+# https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
+- name: Add kube-prometheus-stack helm repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+
+- name: status of kube-prometheus-stack
+  kubernetes.core.helm_info:
+    name: prom-stack
+    release_namespace: prom
+  register: helm_info
+- debug:
+    msg: "{{ helm_info.status.status }}"
+  # need conditional or fallback because uninstalled helm chart does not have nested variable
+  when: helm_info.status is defined
+
+
+# kubectl create ns prom
+#helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#kubectl --namespace prom get pods -l "release=prom-stack"
+- name: Deploy kube-prometheus-stack
+  kubernetes.core.helm:
+    name: prom-stack
+    chart_ref: prometheus-community/kube-prometheus-stack
+    wait: false
+    values: "{{ lookup('template', role_path + '/templates/prom-sparse.yaml') | from_yaml }}"
+    release_namespace: prom
+    create_namespace: true
+    force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
+
+- name: retrieve prometheus etcd http-metrics TCP port
+  become_user: ubuntu
+  command:
+    cmd: kubectl get services -n kube-system prom-stack-kube-prometheus-kube-etcd -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
+  register: prom_etcd
+- set_fact:
+    prom_etcd_port_needs_change: "{{prom_etcd.stdout|int != 2381}}"
+- debug: msg="{{prom_etcd_port_needs_change}}"
+
+- name: change prometheus etcd service port to 2381 so it can be pulled as metric
+  become_user: ubuntu
+  command:
+    cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381,"targetPort":2381}]}}'''
+  register: etcd_service_port
+  when: prom_etcd_port_needs_change
+- debug: msg="{{etcd_service_port.stdout_lines|default('')}}"
+
+# fixups:
+# to avoid KubeProxyDown because metrics binding is empty
+# https://stackoverflow.com/questions/70491211/prometheus-alert-rule-for-absent-discovered-target
+# kubectl get configmap/kube-proxy -n kube-system -o json | sed 's/metricsBindAddress\: .*\n/metricsBindAddress: 9999/'
+
+# KubeControllerManagerDown
+# https://github.com/prometheus-operator/kube-prometheus/issues/718
+
+# https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/kube-prometheus-on-kubeadm.md
+# https://prometheus-operator.dev/docs/kube-prometheus-on-kubeadm/
+# better to use config file when setting up kubeadm
+# make these changes on control filesystem, and k8s will restart these pods with correct values
+#sed -e "s/- --bind-address=127.0.0.1/- --bind-address=0.0.0.0/" -i /etc/kubernetes/manifests/kube-controller-manager.yaml
+#sed -e "s/- --bind-address=127.0.0.1/- --bind-address=0.0.0.0/" -i /etc/kubernetes/manifests/kube-scheduler.yaml
+
+# https://groups.google.com/g/prometheus-users/c/_aI-HySJ-xM
+# etcdInsufficientMembers and TargetDown on job=kube-etcd resolved by modifying -n kube-system service/prom-stack-kube-prometheus-kube-etcd; modified spec.ports[@name=http-metrics].port=2381 .targetPort=2381
+# AND
+# on control plan host, /etc/kubernetes/manifests/etcd.yaml adding clusterIP to listen-metrics-url
+# --listen-metrics-urls=http://127.0.0.1:2381,http://192.168.122.217:2381
+# 
+
+# also add more memory to etcd during kubeadm init because I/O is slow and more memory might help
+
+
+# creating your own metrics for prom
+# https://kruschecompany.com/kubernetes-prometheus-operator/

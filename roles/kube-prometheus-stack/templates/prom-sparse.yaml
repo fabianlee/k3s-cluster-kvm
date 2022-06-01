@@ -1,0 +1,150 @@
+
+# k3s is a small binary that does not have these independent components
+defaultRules:
+  rules:
+    kubeProxy: false
+    kubeScheduler: false
+    etcd: false
+
+alertmanager:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+{% if prometheus_ingress_at == "subdomain" %}
+    hosts: ['alertmanager.{{ cert_domains_list | first }}']
+    paths: ['/']
+    tls:
+    - secretName: {{secret_name}}
+      hosts:
+      - alertmanager.{{ cert_domains_list | first }}
+{% elif prometheus_ingress_at == "context" %}
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts: ['{{ cert_domains_list | first }}']
+    paths: ['/alertmanager(/|$)(.*)']
+    tls:
+    - secretName: {{secret_name}}
+      hosts:
+      - {{ cert_domains_list | first }}
+{% endif %}
+
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {{storage_class}}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+{% if prometheus_ingress_at == "subdomain" %}
+    externalUrl: https://alertmanager.{{ cert_domains_list | first }}/
+{% elif prometheus_ingress_at == "context" %}
+    externalUrl: https://{{ cert_domains_list | first }}/alertmanager
+{% endif %}
+    routePrefix: /
+
+  config:
+    global:
+      resolve_timeout: 5m
+      # global smtp settings
+      smtp_from: amgr@k3s
+      smtp_smarthost: {{smtp_host_port}}
+      smtp_require_tls: false
+
+    route:
+      group_by: ['alertname'] # not default job
+      group_wait: 2s # not default 30
+      group_interval: 30s # not default 5m
+      repeat_interval: 4h # not default 12h
+      receiver: email_platform
+      routes:
+      - receiver: 'null'
+        matchers:
+          - alertname =~ "InfoInhibitor|Watchdog"
+      - receiver: email_platform
+        continue: true
+    receivers:
+    # https://prometheus.io/docs/alerting/latest/configuration/#email_config
+    - name: email_platform
+      email_configs:
+      - to: platform@k3s
+        send_resolved: true
+        headers:
+          # used jinja string to avoid needing to escape curly brackets (which should not be ansible evaluated)
+          subject: "{{ '{{ .Status | toUpper }} {{ .CommonLabels.mycluster }}:{{ .CommonLabels.namespace }}:{{ .CommonLabels.alertname }} {{ .CommonAnnotations.summary }}' }}"
+    - name: 'null'
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
+
+grafana:
+{% if prometheus_ingress_at == "context" %}
+  env:
+    GF_SERVER_ROOT_URL: https://{{ cert_domains_list | first }}/grafana
+    GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
+{% endif %}
+  # username is 'admin'
+  adminPassword: prom-operator
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+{% if prometheus_ingress_at == "subdomain" %}
+    hosts: ['grafana.{{ cert_domains_list | first }}']
+    path: "/"
+    tls:
+    - secretName: {{secret_name}}
+      hosts:
+      - grafana.{{ cert_domains_list | first }}
+{% elif prometheus_ingress_at == "context" %}
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts: ['{{ cert_domains_list | first }}']
+    path: "/grafana(/|$)(.*)"
+    tls:
+    - secretName: {{secret_name}}
+      hosts:
+      - {{ cert_domains_list | first }}
+{% endif %}
+
+prometheus:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+{% if prometheus_ingress_at == "subdomain" %}
+    hosts: ['prometheus.{{ cert_domains_list | first }}']
+    paths: ['/']
+    tls:
+    - secretName: {{secret_name}}
+      hosts:
+      - prometheus.{{ cert_domains_list | first }}
+{% elif prometheus_ingress_at == "context" %}
+    hosts: ['{{ cert_domains_list | first }}']
+    paths: ['/prometheus'] # does not need regex capture like others, leave off trailing forward slash
+    tls:
+    - secretName: {{secret_name}}
+      hosts:
+      - {{ cert_domains_list | first }}
+{% endif %}
+
+  prometheusSpec:
+{% if prometheus_ingress_at == "subdomain" %}
+    externalUrl: "https://prometheus.{{ cert_domains_list | first }}/"
+    routePrefix: /
+{% elif prometheus_ingress_at == "context" %}
+    externalUrl: "https://{{ cert_domains_list | first }}/prometheus"
+
+    # link from alertmanager to source does not work when using same domain
+    # this ia problem with the elm file
+    # https://github.com/prometheus/alertmanager/issues/1881
+    # https://github.com/prometheus/alertmanager/pull/2470/files
+    routePrefix: /prometheus
+{% endif %}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {{storage_class}}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi

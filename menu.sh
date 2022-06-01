@@ -31,9 +31,14 @@ menu_items=(
   ""
   "istio,Deploy Istio ingress gateway at load balancer IP"
   "istio-test,Test primary and secondary Istio gateways"
+  ""
+  "nfs-host,Create /data/nfs1 on Ansible orchestrator host"
+  "nfs-sc,Install nfs dynamic provisioner and StorageClass"
+  ""
+  "mailhog,Deploy in-cluster SMTP server for mail alerts"
+  "prometheus,Deploy open-source kube-prometheus-stack"
+
 )
-#  ""
-#  "prometheus,Deploy open-source kube-prometheus-stack"
 
 function showMenu() {
   echo ""
@@ -271,6 +276,32 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+
+    nfs-host)
+      set -x
+      prereq/create_host_nfs.sh
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    nfs-sc)
+      set -x
+      ansible-playbook playbook_nfs_helm_sc.yml
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    mailhog)
+      set -x
+      ansible-playbook playbook_mailhog.yml
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
     prometheus)
       set -x
       ansible-playbook playbook_prometheus_helm.yml

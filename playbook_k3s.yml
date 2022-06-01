@@ -1,10 +1,12 @@
 ---
 
+# role comes from https://github.com/k3s-io/k3s-ansible
 - hosts: master
   become: yes
   roles:
     - role: k3s/master
 
+# role comes from https://github.com/k3s-io/k3s-ansible
 - hosts: node
   become: yes
   roles:
@@ -17,6 +19,8 @@
     - role: k3s-fix-master-node-ip
     - { role: k3s-get-kubeconfig-local }
     - role: k9s
+    - role: helm3
+    - role: yq
 
 - hosts: master
   become: no
