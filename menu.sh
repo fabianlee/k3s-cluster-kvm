@@ -18,6 +18,7 @@ menu_items=(
   "ansibleping,Verify that ansible can reach guest VMS"
   "ssh,Manual ssh into guest VMs"
   ""
+  "k3s-prereq,prereq OS package, settings, binaries"
   "k3s,Install k3s control plane and workers"
   ""
   "metallb,Configure MetalLB to provide IP addresses to LB"
@@ -191,7 +192,14 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+    k3s-prereq)
+      set -x
+      ansible-playbook playbook_k3s_prereq.yml
+      retVal=$?
+      set +x 
 
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
     k3s)
       set -x
       ansible-playbook playbook_k3s.yml
