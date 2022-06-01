@@ -3,20 +3,26 @@
 Modify variables for environment
   * vi group_vars/all
 
-Prereq
+Prereq for scripts
   * ansible-playbook install_dependencies.yml
 
-Create infrastructure
+Create guest OS with KVM
   * ansible-playbook playbook_terraform.yml
 
-Then apply Ansible roles:
+Install k3s:
+  * ansible-playbook playbook_k3s_prereq.yml
   * ansible-playbook playbook_k3s.yml
 
-Choose between MetalLB+nginx or MetalLB+istio ingress
+Install MetalLB and certificates
   * ansible-playbook playbook_metallb.yml
   * ansible-playbook playbook_certs.yml
+
+Choose between NGINX Ingress or Istio Gateways
   * ansible-playbook playbook_nginx.yml
+  * ansible-playbook playbook_nginx_test.yml
+  OR
   * ansible-playbook playbook_istio.yml
+  * ansible-playbook playbook_istio_test.yml
 
 Validate kubectl locally:
   * export KUBECONFIG=/tmp/k3s-kubeconfig
@@ -29,7 +35,7 @@ Validate ingress locally:
 
   * test nginx ingress
     ./test-nginx-endpoints.sh
-
+  OR
   * test istio ingress
     ./test-istio-endpoints.sh
 
