@@ -26,10 +26,10 @@ menu_items=(
   ""
   "hello,Deploys hello app to /myhello/ and /myhello2/"
   ""
-  "nginx,Deploy NGINX Ingress as load balancer"
+  "nginx,Deploy NGINX Ingress at load balancer IP"
   "nginx-test,Test primary and secondary NGINX Ingress"
   ""
-  "istio,Deploy Istio as load balancer"
+  "istio,Deploy Istio ingress gateway at load balancer IP"
   "istio-test,Test primary and secondary Istio gateways"
 )
 #  ""
