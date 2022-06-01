@@ -10,14 +10,8 @@
     istio_version: 1.9.7 # validated on 1.7.5 and 1.9.7
 
   roles:
-    # public LB endpoints
-    - role: k3s-metallb
-
     # istio operator (istio-operator) and primary+secondary ingress gateway services (istio-system)
     - role: istio-operator
 
-    # istio gateways (primary and secondary)
+    # istio independent gateways (primary and secondary)
     - role: istio-gateway
-
-    # deploys hello world apps, projected unto primary and secondary gateway
-    - role: istio-helloworld

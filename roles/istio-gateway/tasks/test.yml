@@ -16,7 +16,7 @@
   copy:
     src: test-istio-gateway.sh
     dest: "{{TMPDIR}}/test-istio-gateway.sh"
-    mode: '0755'
+    mode: '0777'
 
 - debug: 
     msg: "test-istio-gateway.sh {{primary_lbIP.stdout}} {{cert_domains_primary_ingress|join(',')}} {{secondary_lbIP.stdout}} {{cert_domains_secondary_ingress|join(',') }}"

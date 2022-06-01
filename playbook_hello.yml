@@ -1,0 +1,10 @@
+---
+
+- hosts: master
+  gather_facts: yes
+  become: no
+
+  roles:
+    # deploys hello world apps, to primary (:8080/myhello/) and secondary (:8080/myhello2)
+    - { role: golang-hello-world-web, do_second_ingress: true }
+

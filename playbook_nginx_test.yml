@@ -1,0 +1,15 @@
+---
+
+- hosts: master
+  gather_facts: yes
+  become: yes
+
+  vars:
+    # 'false' means tested from inside master k3s-1
+    nginx_ingress_tested_from_localhost: false
+
+  tasks:
+  - name: run tests against NGINX ingress
+    include_role:
+      name: nginx-ingress
+      tasks_from: test.yml

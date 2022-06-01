@@ -21,8 +21,8 @@ spec:
   - host: {{ cert_domains_primary_ingress | first }}
     http:
       paths:
-      - pathType: Prefix #Exact
-        path: "/myhello/"
+      - pathType: Prefix
+        path: /myhello
         backend:
           service:
             name: golang-hello-world-web-service

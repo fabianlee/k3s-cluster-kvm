@@ -7,13 +7,6 @@
     - ingress
 
   roles:
-    # public LB endpoints
-    - role: k3s-metallb
-
     # primary and secondary nginx ingress
     - role: add_primary_nginx_ingress
     - role: add_secondary_nginx_ingress
-
-    # deploys hello world apps, using primary and secondary ingress
-    - { role: golang-hello-world-web, do_second_ingress: true }
-

@@ -10,7 +10,8 @@ spec:
   http:
   - match:
     - uri:
-        exact: /hello
+        #exact: /hello
+        prefix: /myhello/
     route:
     - destination:
         host: helloworld

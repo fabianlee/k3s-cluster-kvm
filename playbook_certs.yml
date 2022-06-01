@@ -4,4 +4,4 @@
   become: yes
   roles:
     - { role: cert-with-ca, cert_overwrite: false }
-    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default','istio-system' ], tls_secret_overwrite: false }
+    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default','istio-system' ], tls_secret_overwrite: true }

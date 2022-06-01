@@ -1,0 +1,41 @@
+---
+
+- command: kubectl get service ingress-nginx-controller -n ingress-nginx --output jsonpath='{.spec.clusterIP}'
+  register: primary_clusterIP
+- command: kubectl get service ingress-secondary -n ingress-nginx --output jsonpath='{.spec.clusterIP}'
+  register: secondary_clusterIP
+- debug: msg="ClusterIP primary/secondary {{":"}} {{primary_clusterIP.stdout}}/{{secondary_clusterIP.stdout}}"
+
+- command: kubectl get service ingress-nginx-controller -n ingress-nginx --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: primary_lbIP
+- command: kubectl get service ingress-secondary -n ingress-nginx --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: secondary_lbIP
+- debug: msg="LB primary/secondary {{":"}} {{primary_lbIP.stdout}}/{{secondary_lbIP.stdout}}"
+
+- name: copy nginx ingress test to remote host
+  copy:
+    src: test-nginx-ingress.sh
+    dest: "{{TMPDIR}}/test-nginx-ingress.sh"
+    mode: '0777'
+
+- debug: 
+    msg: "test-nginx-ingress.sh {{primary_lbIP.stdout}} {{cert_domains_primary_ingress|first }} {{secondary_lbIP.stdout}} {{cert_domains_secondary_ingress|first }}"
+
+- block:
+    - name: test pulling pages from primary and secondary nginx ingress, from localhost
+      delegate_to: localhost
+      command: "{{role_path}}/files/test-nginx-ingress.sh {{primary_lbIP.stdout}} {{cert_domains_primary_ingress|first }} {{secondary_lbIP.stdout}} {{cert_domains_secondary_ingress|first }}"
+      register: stdout
+    - debug: msg="{{stdout.stdout_lines}}"
+    - debug: msg="{{stdout.cmd | join(' ') }}"
+  when: nginx_ingress_tested_from_localhost
+
+- block:
+    - name: test pulling pages from primary and secondary nginx ingress, from target host
+      command: "{{TMPDIR}}/test-nginx-ingress.sh {{primary_clusterIP.stdout}} {{cert_domains_primary_ingress|first }} {{secondary_clusterIP.stdout}} {{cert_domains_secondary_ingress|first }}"
+      register: stdout
+      when: not nginx_ingress_tested_from_localhost
+
+    - debug: msg="{{stdout.stdout_lines}}"
+    - debug: msg="{{stdout.cmd | join(' ') }}"
+  when: not nginx_ingress_tested_from_localhost
