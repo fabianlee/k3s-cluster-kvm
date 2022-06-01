@@ -22,8 +22,12 @@ menu_items=(
   ""
   "metallb,Configure MetalLB to provide IP addresses to LB"
   "certs,Create certs and load into cluster"
+  ""
   "nginx,Deploy NGINX Ingress as load balancer"
+  "nginx-test,Test primary and secondary NGINX Ingress"
+  ""
   "istio,Deploy Istio as load balancer"
+  "istio-test,Test primary and secondary Istio gateways"
 )
 #  ""
 #  "prometheus,Deploy open-source kube-prometheus-stack"
@@ -213,6 +217,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
+
     nginx)
       set -x
       ansible-playbook playbook_nginx.yml
@@ -221,9 +226,26 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
+    nginx-test)
+      set -x
+      ansible-playbook playbook_nginx_test.yml
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
     istio)
       set -x
       ansible-playbook playbook_istio.yml
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    istio-test)
+      set -x
+      ansible-playbook playbook_istio_test.yml
       retVal=$?
       set +x 
 
