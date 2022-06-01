@@ -34,6 +34,6 @@
   loop: "{{ secret_namespace_list }}"
 
 - debug: msg="ok"
-  loop: "{{create_result.results}}"
+  loop: "{{create_result.results|default([])}}"
   loop_control:
-    label: "{{item.stdout}}"
+    label: "{{item.stdout|default('')}}"

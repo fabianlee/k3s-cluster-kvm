@@ -20,14 +20,14 @@
     # https://galaxy.ansible.com/community/kubernetes
     - name: get community.kubernetes collection from ansible galaxy, be patient can take 5 minutes
       command:
-        cmd: ansible-galaxy collection install community.kubernetes:1.2.1 -p .
+        cmd: ansible-galaxy collection install community.kubernetes:2.0.1 -p .
         creates: "{{playbook_dir}}/../collections/ansible_collections/community/kubernetes"
         chdir: "{{playbook_dir}}/../collections"
 
     # https://galaxy.ansible.com/community/crypto
     - name: get community.crypto collection from ansible galaxy, be patient can take 5 minutes
       command:
-        cmd: ansible-galaxy collection install community.crypto:1.7.1 -p .
+        cmd: ansible-galaxy collection install community.crypto:2.2.1 -p .
         creates: "{{playbook_dir}}/../collections/ansible_collections/community/crypto"
         chdir: "{{playbook_dir}}/../collections"
 

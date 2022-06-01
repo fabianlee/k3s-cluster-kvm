@@ -3,16 +3,20 @@
 Modify variables for environment
   * vi group_vars/all
 
+Prereq
+  * ansible-playbook install_dependencies.yml
+
 Create infrastructure
   * ansible-playbook playbook_terraform.yml
 
 Then apply Ansible roles:
-  * ansible-playbook install_dependencies.yml
   * ansible-playbook playbook_k3s.yml
 
 Choose between MetalLB+nginx or MetalLB+istio ingress
-  * ansible-playbook playbook_metallb_nginx.yml
-  * ansible-playbook playbook_metallb_istio.yml
+  * ansible-playbook playbook_metallb.yml
+  * ansible-playbook playbook_certs.yml
+  * ansible-playbook playbook_nginx.yml
+  * ansible-playbook playbook_istio.yml
 
 Validate kubectl locally:
   * export KUBECONFIG=/tmp/k3s-kubeconfig

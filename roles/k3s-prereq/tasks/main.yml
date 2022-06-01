@@ -48,7 +48,7 @@
   delay: 60
   until: apt_install is success or ('Unable to acquire the dpkg frontend lock' not in apt_install.msg)
 
-- name: install python3 packages
+- name: install python3 apt packages
   apt:
     pkg:
     - python3
@@ -61,15 +61,14 @@
   delay: 60
   until: apt_install is success or ('Unable to acquire the dpkg frontend lock' not in apt_install.msg)
 
-- name: install required pip3 dependencies for ansible galaxy kubernetes modules
+- name: install required pip3 dependencies for ansible galaxy modules
   become: yes
   pip:
     name:
+      - kubernetes
       - openshift
       - pyyaml
     executable: pip3
-    # not necessary to use extra_args
-    #extra_args: --upgrade pip
 
 - name: soft limit for nofile
   pam_limits:
@@ -113,7 +112,7 @@
   copy:
     dest: /etc/skel/.vimrc
     content: |
-      colorscheme desert
+      colorscheme torte
       syntax on
       set paste
       set ruler
