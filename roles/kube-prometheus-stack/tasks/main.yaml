@@ -49,24 +49,28 @@
     values: "{{ lookup('template', role_path + '/templates/prom-sparse.yaml') | from_yaml }}"
     release_namespace: prom
     create_namespace: true
-    force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
+    #force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
 
-- name: retrieve prometheus etcd http-metrics TCP port
-  #become_user: ubuntu
-  command:
-    cmd: kubectl get services -n kube-system prom-stack-kube-prometheus-kube-etcd -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
-  register: prom_etcd
-- set_fact:
-    prom_etcd_port_needs_change: "{{prom_etcd.stdout|int != 2381}}"
-- debug: msg="{{prom_etcd_port_needs_change}}"
-
-- name: change prometheus etcd service port to 2381 so it can be pulled as metric
-  #become_user: ubuntu
-  command:
-    cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381,"targetPort":2381}]}}'''
-  register: etcd_service_port
-  when: prom_etcd_port_needs_change
-- debug: msg="{{etcd_service_port.stdout_lines|default('')}}"
+# NOW taking care of this in template, changing port for etcd to 2381 to match service
+#
+#- name: block for additional kubeadm modification
+#  block:
+#    - name: retrieve prometheus etcd http-metrics TCP port
+#      command:
+#        cmd: kubectl get services -n kube-system prom-stack-kube-prometheus-kube-etcd -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
+#      register: prom_etcd
+#    - set_fact:
+#        prom_etcd_port_needs_change: "{{prom_etcd.stdout|int != 2381}}"
+#    - debug: msg="{{prom_etcd_port_needs_change}}"
+#    
+#    - name: change prometheus etcd service port to 2381 so it can be pulled as metric
+#      command:
+#        cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381,"targetPort":2381}]}}'''
+#      register: etcd_service_port
+#      when: prom_etcd_port_needs_change
+#    - debug: msg="{{etcd_service_port.stdout_lines|default('')}}"
+#
+#  when: k8s_implementation == "kubeadm"
 
 # fixups:
 # to avoid KubeProxyDown because metrics binding is empty
