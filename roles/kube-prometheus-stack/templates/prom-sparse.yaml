@@ -4,6 +4,9 @@
 # https://github.com/k3s-io/k3s/issues/3619#issuecomment-878501106
 # https://github.com/ricsanfre/pi-cluster/issues/22
 # https://github.com/k3s-io/k3s/issues/3619
+# check with: curl localhost:10249/metrics | grep ^kubeproxy 
+# grep ^etcd
+# grep 
 #defaultRules:
 #  rules:
 #    kubeProxy: false
