@@ -108,7 +108,7 @@ alertmanager:
     global:
       resolve_timeout: 5m
       # global smtp settings
-      smtp_from: amgr@k3s
+      smtp_from: amgr@{{k8s_implementation}}
       smtp_smarthost: {{smtp_host_port}}
       smtp_require_tls: false
 
@@ -128,7 +128,7 @@ alertmanager:
     # https://prometheus.io/docs/alerting/latest/configuration/#email_config
     - name: email_platform
       email_configs:
-      - to: platform@k3s
+      - to: platform@{k8s_implementation}}
         send_resolved: true
         headers:
           # used jinja string to avoid needing to escape curly brackets (which should not be ansible evaluated)

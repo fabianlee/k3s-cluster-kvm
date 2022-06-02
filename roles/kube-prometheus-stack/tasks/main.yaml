@@ -1,6 +1,10 @@
 # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
 ---
 
+- set_fact:
+    master_ip_internal: "{{ansible_ens3.ipv4.address}}"
+- debug: msg="{{master_ip_internal}}"
+
 - name: retrieve mailhog ClusterIP
   #become_user: ubuntu
   command:
