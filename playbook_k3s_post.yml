@@ -1,0 +1,15 @@
+---
+
+# post cluster steps
+- hosts: master
+  become: yes
+  roles:
+    - role: additional-netplan-ip
+    - role: k3s-fix-master-node-ip
+    - role: k3s-get-kubeconfig-local
+    - role: tiny-tools-all-nodes
+
+#- hosts: master
+#  become: no
+#  roles:
+#    - role: tiny-tools-all-nodes

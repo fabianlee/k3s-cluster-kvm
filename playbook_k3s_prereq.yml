@@ -7,7 +7,7 @@
   roles:
     - k3s-prereq
 
-# role coming from 'k3s-ansible' project
+# roles coming from 'k3s-ansible' project
 # https://github.com/k3s-io/k3s-ansible
 - hosts: k3s_cluster
   gather_facts: yes
@@ -16,9 +16,13 @@
     - prereq 
     - download
 
-# places /etc/rancher/k3s/config.yaml read by k3s installation process
 - hosts: master
   gather_facts: yes
   become: yes
   roles:
+    # /etc/rancher/k3s/config.yaml for k3s installation
     - k3s-initial-config
+    # various utils
+    - k9s
+    - helm3
+    - yq
