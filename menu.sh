@@ -22,7 +22,7 @@ menu_items=(
   "k3s,Install k3s control plane and workers"
   ""
   "metallb,Configure MetalLB to provide IP addresses to LB"
-  "certs,Create certs and load into cluster"
+  "certs,Create certs and load TLS secret into cluster"
   ""
   "hello,Deploys hello app to /myhello/ and /myhello2/"
   ""
@@ -36,7 +36,7 @@ menu_items=(
   "nfs-sc,Install nfs dynamic provisioner and StorageClass"
   ""
   "mailhog,Deploy in-cluster SMTP server for mail alerts"
-  "prometheus,Deploy open-source kube-prometheus-stack"
+  "prometheus,Deploy community kube-prometheus-stack with helm3"
 
 )
 

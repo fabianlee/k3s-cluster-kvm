@@ -7,6 +7,9 @@
     - ingress
 
   roles:
-    # primary and secondary nginx ingress
+    # primary and secondary Daemonset nginx controllers
     - role: add_primary_nginx_ingress
     - role: add_secondary_nginx_ingress
+
+    # Ingress objects
+    - role: nginx-ingress

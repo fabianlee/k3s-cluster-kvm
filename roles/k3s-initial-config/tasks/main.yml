@@ -1,0 +1,14 @@
+# https://github.com/k3s-io/k3s/issues/3619
+# https://rancher.com/docs/k3s/latest/en/installation/install-options/#configuration-file
+---
+
+- file:
+    path: /etc/rancher/k3s
+    mode: 755
+    state: directory
+
+- name: create /etc/rancher/k3s/config.yaml for initial k3s installation options
+  template:
+    src: config.yaml
+    dest: /etc/rancher/k3s/config.yaml
+    mode: 777

@@ -1,0 +1,11 @@
+#https://rancher.com/docs/k3s/latest/en/installation/install-options/#configuration-file
+# read by k3s at installation if it exists at /etc/rancher/k3s/config.yaml
+kube-controller-manager-arg:
+- "address=0.0.0.0"
+- "bind-address=0.0.0.0"
+kube-proxy-arg:
+- "metrics-bind-address=0.0.0.0"
+kube-scheduler-arg:
+- "address=0.0.0.0"
+- "bind-address=0.0.0.0"
+etcd-expose-metrics: true

@@ -3,6 +3,7 @@
 - hosts: master
   gather_facts: yes
   become: yes
-  become_user: ubuntu
+  # do as root, ubuntu has problems reading config.yaml
+  #become_user: ubuntu
   roles:
     - mailhog

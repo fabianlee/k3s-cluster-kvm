@@ -1,11 +1,5 @@
 ---
 
-- name: check kubectl
-  become: yes
-  command: kubectl get nodes
-  register: getnodes
-- debug: msg="{{getnodes.stdout_lines}}"
-
 - name: create file out of every jinja2 template
   template:
     src: "{{item}}"

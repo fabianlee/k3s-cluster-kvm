@@ -20,20 +20,21 @@
     create_namespace: true
 
 - name: wait for mailhog deployment to be ready before continuing
-  become_user: ubuntu
   shell: "kubectl wait deployment -n email mailhog --for condition=Available=True --timeout=10s"
+  #environment:
+  #  KUBECONFIG: /home/ubuntu/.kube/config
   retries: 10
   delay: 30
   register: kubectl_mailhog_ready
   until: kubectl_mailhog_ready.rc==0
 
 - name: retrieve mailhog ClusterIP
-  become_user: ubuntu
+  #become_user: ubuntu
   command:
     cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.clusterIP}"
   register: mailhog_cluster_ip
 - name: retrieve mailhog SMTP port
-  become_user: ubuntu
+  #become_user: ubuntu
   command:
     cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.ports[?(@.name=='tcp-smtp')].port}"
   register: mailhog_smtp_port 
@@ -56,7 +57,7 @@
     namespace: default
   register: swaks_deployed
 - name: wait for tiny-tools-with-swaks deployment to be ready before continuing
-  become_user: ubuntu
+  #become_user: ubuntu
   shell: "kubectl wait deployment -n default tiny-tools-with-swaks --for condition=Available=True --timeout=10s"
   retries: 10
   delay: 30

@@ -1,10 +1,14 @@
 
 # k3s is a small binary that does not have these independent components
-defaultRules:
-  rules:
-    kubeProxy: false
-    kubeScheduler: false
-    etcd: false
+# going to try enabling components at k3s level
+# https://github.com/k3s-io/k3s/issues/3619#issuecomment-878501106
+# https://github.com/ricsanfre/pi-cluster/issues/22
+# https://github.com/k3s-io/k3s/issues/3619
+#defaultRules:
+#  rules:
+#    kubeProxy: false
+#    kubeScheduler: false
+#    etcd: false
 
 alertmanager:
   ingress:

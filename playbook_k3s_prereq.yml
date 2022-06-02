@@ -15,3 +15,10 @@
   roles:
     - prereq 
     - download
+
+# places /etc/rancher/k3s/config.yaml read by k3s installation process
+- hosts: master
+  gather_facts: yes
+  become: yes
+  roles:
+    - k3s-initial-config

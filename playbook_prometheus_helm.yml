@@ -3,6 +3,6 @@
 - hosts: master
   gather_facts: yes
   become: yes
-  become_user: ubuntu
+  #become_user: ubuntu
   roles:
     - kube-prometheus-stack

@@ -2,12 +2,12 @@
 ---
 
 - name: retrieve mailhog ClusterIP
-  become_user: ubuntu
+  #become_user: ubuntu
   command:
     cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.clusterIP}"
   register: mailhog_cluster_ip
 - name: retrieve mailhog SMTP port
-  become_user: ubuntu
+  #become_user: ubuntu
   command:
     cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.ports[?(@.name=='tcp-smtp')].port}"
   register: mailhog_smtp_port
@@ -52,7 +52,7 @@
     force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
 
 - name: retrieve prometheus etcd http-metrics TCP port
-  become_user: ubuntu
+  #become_user: ubuntu
   command:
     cmd: kubectl get services -n kube-system prom-stack-kube-prometheus-kube-etcd -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
   register: prom_etcd
@@ -61,7 +61,7 @@
 - debug: msg="{{prom_etcd_port_needs_change}}"
 
 - name: change prometheus etcd service port to 2381 so it can be pulled as metric
-  become_user: ubuntu
+  #become_user: ubuntu
   command:
     cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381,"targetPort":2381}]}}'''
   register: etcd_service_port
