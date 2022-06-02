@@ -28,6 +28,9 @@ cert_CA: myCA.local
 cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local','mailhog.k3s.local']
 cert_domains_secondary_ingress: ['k3s-secondary.local']
 
+# prometheus monitoring put at subdomain by default ('context' is other choice)
+prometheus_ingress_at: subdomain
+
 # configure these users with proper: group, permissions, ~/.kube/config
 users: ['ubuntu'] # 'fabian' for virtualbox, 'ubuntu' for kvm/libvirt
 
