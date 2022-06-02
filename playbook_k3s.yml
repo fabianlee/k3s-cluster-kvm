@@ -1,0 +1,16 @@
+---
+
+# role comes from https://github.com/k3s-io/k3s-ansible
+- hosts: master
+  become: yes
+  gather_facts: yes
+  roles:
+    - role: k3s/master
+
+# this role depends on 'token' value retrieved above
+# role comes from https://github.com/k3s-io/k3s-ansible
+- hosts: node
+  become: yes
+  gather_facts: true
+  roles:
+    - role: k3s/node

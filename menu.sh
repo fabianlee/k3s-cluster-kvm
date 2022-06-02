@@ -19,8 +19,7 @@ menu_items=(
   "ssh,Manual ssh into guest VMs"
   ""
   "k3s-prereq,prereq OS package, settings, binaries"
-  "k3s-control,Install k3s control plane"
-  "k3s-workers,Add k3s workers"
+  "k3s,Deploy k3s control plane and workers"
   "k3s-post,k3s post configuration of cluster"
   ""
   "metallb,Configure MetalLB to provide IP addresses to LB"
@@ -209,17 +208,9 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    k3s-control)
+    k3s)
       set -x
-      ansible-playbook playbook_k3s_controlplane.yml
-      retVal=$?
-      set +x 
-
-      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
-      ;;
-    k3s-workers)
-      set -x
-      ansible-playbook playbook_k3s_workers.yml
+      ansible-playbook playbook_k3s.yml
       retVal=$?
       set +x 
 

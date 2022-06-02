@@ -1,7 +1,0 @@
----
-
-# role comes from https://github.com/k3s-io/k3s-ansible
-- hosts: master
-  become: yes
-  roles:
-    - role: k3s/master
