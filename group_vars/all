@@ -14,9 +14,13 @@ metal_lb_secondary: "{{metal_lb_prefix}}.144"
 ansible_user: ubuntu
 systemd_dir: /etc/systemd/system
 master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
-metrics_args: "--kube-controller-manager-arg 'bind-address=0.0.0.0' --kube-controller-manager-arg 'address=0.0.0.0' --kube-proxy-arg 'metrics-bind-address=0.0.0.0' --kube-scheduler-arg 'bind-address=0.0.0.0' --kube-scheduler-arg 'address=0.0.0.0'"
-extra_server_args: " --disable servicelb --disable traefik" # so that klipper is disabled, and metalLB can be used
+# using /etc/rancher/k3s/config.yaml instead of specifying monitoring requirements in args
+#metrics_args: "--kube-controller-manager-arg 'bind-address=0.0.0.0' --kube-controller-manager-arg 'address=0.0.0.0' --kube-proxy-arg 'metrics-bind-address=0.0.0.0' --kube-scheduler-arg 'bind-address=0.0.0.0' --kube-scheduler-arg 'address=0.0.0.0'"
+extra_server_args: " --disable servicelb --disable traefik" # klipper disabled, so metalLB can be used
+
+# https://blog.loitzl.com/posts/k8s-1.20-breaks-nfs-client-provisioner
 # NFS might need to add 'feature-gates=RemoveSelfLink=false' for 1.20+
+# BUT it works fine without in 1.21 that we are using
 extra_agent_args: ""
 
 # for SAN certificate with custom CA
