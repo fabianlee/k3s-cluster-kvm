@@ -10,3 +10,6 @@ prometheus_ingress_at: subdomain
 
 # kubernetes implementation type
 k8s_implementation: kubeadm
+
+# can override to create additional scrape jobs
+prometheus_additional_scrape_configs: []

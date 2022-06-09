@@ -200,6 +200,17 @@ prometheus:
     # https://github.com/prometheus/alertmanager/pull/2470/files
     routePrefix: /prometheus
 {% endif %}
+
+    # do not require new PrometheusRule to have all the helm labels in order to match
+    ruleSelectorNilUsesHelmValues: false
+
+    # additional scrape job, specifically ability to read annotations on Service
+    # annotations:
+    #   prometheus.io/scrape: 'true'
+    #   prometheus.io/path: '/data/metrics'
+    #   prometheus.io/port: '80'
+    additionalScrapeConfigs: {{ prometheus_additional_scrape_configs }}
+
     storageSpec:
       volumeClaimTemplate:
         spec:

@@ -40,6 +40,9 @@
   # need conditional or fallback because uninstalled helm chart does not have nested variable
   when: helm_info.status is defined
 
+- template:
+    src: prom-sparse.yaml
+    dest: /tmp/prom-sparse.yaml
 
 # kubectl create ns prom
 #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
