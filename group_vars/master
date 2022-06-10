@@ -26,6 +26,12 @@ additional_nic:
         search:
         - home.lab
 
+# common labels available to AlertManager
+prometheus_external_labels:
+  cluster: k3s
+  env: dev
+  jumpbox: localhost.local
+
 prometheus_additional_scrape_configs:
 # http://elatov.github.io/2020/01/alerting-with-prometheus-on-kubernetes/
 - job_name: 'kubernetes-service-endpoints'

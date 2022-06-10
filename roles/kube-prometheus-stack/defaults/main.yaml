@@ -13,3 +13,11 @@ k8s_implementation: kubeadm
 
 # can override to create additional scrape jobs
 prometheus_additional_scrape_configs: []
+
+# common labels availble to AlertManager
+prometheus_external_labels: {}
+
+# default values just in case they are not read in from 'files'
+email_html_template: "{{ '<h1>DEFAULT</h1>{{ range .Alerts }}{{ .Annotations.description }}<br/>{{ end }}' }}"
+email_txt_template: "{{ 'DEFAULT\nYou have the following alerts:\n{{ range .Alerts }} {{.Labels.alertname}} on {{ .Labels.instance }}\n{{ end }}' }}"
+

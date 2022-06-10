@@ -1,0 +1,6 @@
+{{ define "emaildefaulttxt" }}
+You have the following alerts:
+{{ range .Alerts }}
+* {{.Labels.alertname}} on {{ .Labels.instance }}
+{{ end }}
+{{ end }}

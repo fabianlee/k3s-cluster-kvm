@@ -40,9 +40,26 @@
   # need conditional or fallback because uninstalled helm chart does not have nested variable
   when: helm_info.status is defined
 
+- copy:
+    src: "{{item}}"
+    dest: /tmp/.
+    mode: 0666
+  loop:
+    - email.default.html
+    - email.default.txt
+- slurp:
+    src: /tmp/email.default.html
+  register: remote_html_content_encoded
+- slurp:
+    src: /tmp/email.default.txt
+  register: remote_txt_content_encoded
+- set_fact:
+    email_html_template: "{{ remote_html_content_encoded.content | b64decode }}"
+    email_txt_template: "{{ remote_txt_content_encoded.content | b64decode }}"
 - template:
     src: prom-sparse.yaml
     dest: /tmp/prom-sparse.yaml
+    mode: 0666
 
 # kubectl create ns prom
 #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
@@ -56,6 +73,7 @@
     values: "{{ lookup('template', role_path + '/templates/prom-sparse.yaml') | from_yaml }}"
     release_namespace: prom
     create_namespace: true
+  when: true
     #force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
 
 # NOW taking care of this in template, changing port for etcd to 2381 to match service

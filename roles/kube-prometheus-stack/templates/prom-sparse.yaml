@@ -104,6 +104,13 @@ alertmanager:
 {% endif %}
     routePrefix: /
 
+  tplConfig: false
+  templateFiles:
+    email.default.html.tmpl: |-
+      {{ email_html_template | indent(6,False) }}
+    email.default.txt.tmpl: |-
+      {{ email_txt_template | indent(6,False) }}
+
   config:
     global:
       resolve_timeout: 5m
@@ -113,7 +120,7 @@ alertmanager:
       smtp_require_tls: false
 
     route:
-      group_by: ['alertname'] # not default job
+      group_by: ['job']
       group_wait: 2s # not default 30
       group_interval: 30s # not default 5m
       repeat_interval: 4h # not default 12h
@@ -128,11 +135,17 @@ alertmanager:
     # https://prometheus.io/docs/alerting/latest/configuration/#email_config
     - name: email_platform
       email_configs:
-      - to: platform@{k8s_implementation}}
+      - to: platform@{{k8s_implementation}}
         send_resolved: true
         headers:
           # used jinja string to avoid needing to escape curly brackets (which should not be ansible evaluated)
-          subject: "{{ '{{ .Status | toUpper }} {{ .CommonLabels.mycluster }}:{{ .CommonLabels.namespace }}:{{ .CommonLabels.alertname }} {{ .CommonAnnotations.summary }}' }}"
+          subject: "{{ '{{ .Status | toUpper }} {{ .CommonLabels.env }}:{{ .CommonLabels.cluster }} {{ .CommonLabels.alertname }}' }}"
+        #html: "{{ '{{ range .Alerts }}{{ .Annotations.description }}<br/>{{ end }}' }}"
+        # proper syntax for external template ready by alertmanager
+        # defining both these values will send email in multipart/alternative
+        html: {{ "'" + '{{ template "emaildefaulthtml" . }}' + "'" }}
+        text: {{ "'" + '{{ template "emaildefaulttxt" . }}' + "'" }}
+
     - name: 'null'
     templates:
     - '/etc/alertmanager/config/*.tmpl'
@@ -210,6 +223,9 @@ prometheus:
     #   prometheus.io/path: '/data/metrics'
     #   prometheus.io/port: '80'
     additionalScrapeConfigs: {{ prometheus_additional_scrape_configs }}
+
+    # external labels will be common for all alerts and available for templating in AlertManager
+    externalLabels: {{ prometheus_external_labels }}
 
     storageSpec:
       volumeClaimTemplate:
