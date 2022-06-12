@@ -105,11 +105,12 @@ alertmanager:
     routePrefix: /
 
   tplConfig: false
-  templateFiles:
-    email.default.html.tmpl: |-
-      {{ email_html_template | indent(6,False) }}
-    email.default.txt.tmpl: |-
-      {{ email_txt_template | indent(6,False) }}
+  # INSTEAD rely on helm --set-file "alertmanager.templateFiles.email\.default\.html\.tmpl"=pathtofile
+  #templateFiles:
+  #  email.default.html.tmpl: |-
+  #    { { email_html_template | indent(6,False) } }
+  #  email.default.txt.tmpl: |-
+  #    { { email_txt_template | indent(6,False) } }
 
   config:
     global:

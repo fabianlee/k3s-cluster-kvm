@@ -61,6 +61,13 @@
     dest: /tmp/prom-sparse.yaml
     mode: 0666
 
+- name: Deploy kube-prometheus-stack with set-file params for templates
+  command:
+    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} --namespace prom -f prom-sparse.yaml prom-stack prometheus-community/kube-prometheus-stack --set-file alertmanager.templateFiles.{{"test\\.tmpl"}}=test.tmpl --set-file alertmanager.templateFiles.{{"email\\.default\\.html\\.tmpl"}}=email.default.html --set-file alertmanager.templateFiles.{{"email\\.default\\.txt\\.tmpl"}}=email.default.txt
+    chdir: /tmp
+  register: helm_cmd
+- debug: msg="{{helm_cmd}}"
+
 # kubectl create ns prom
 #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
 #helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
@@ -73,7 +80,7 @@
     values: "{{ lookup('template', role_path + '/templates/prom-sparse.yaml') | from_yaml }}"
     release_namespace: prom
     create_namespace: true
-  when: true
+  when: false
     #force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
 
 # NOW taking care of this in template, changing port for etcd to 2381 to match service
