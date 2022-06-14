@@ -1,6 +1,13 @@
 {{ define "emaildefaulttxt" }}
 You have the following alerts:
 {{ range .Alerts }}
-* {{.Labels.alertname}} on {{ .Labels.instance }}
+* {{.Labels.alertname}}
+  {{ range .Annotations.SortedPairs }}
+  {{ .Name }} = {{ .Value }}
+  {{ end }}
+  {{ range .Labels.SortedPairs }}
+  {{ .Name }} = {{ .Value }}
+  {{ end }}
+  {{ .GeneratorURL }}
 {{ end }}
 {{ end }}

@@ -325,8 +325,8 @@ a {
                 {{ range .Alerts.Firing }}
                 <tr>
                   <td class="content-block">
-                    <!-- <strong>Labels</strong><br /> -->
-                    <!-- {{ range .Labels.SortedPairs }}{{ .Name }} = {{ .Value }}<br />{{ end }} -->
+                    <strong>Labels</strong><br />
+                    {{ range .Labels.SortedPairs }}{{ .Name }} = {{ .Value }}<br />{{ end }}
                     {{ if gt (len .Annotations) 0 }}<strong>Annotations</strong><br />{{ end }}
                     {{ range .Annotations.SortedPairs }}{{ .Name }} = {{ .Value }}<br />{{ end }}
                     <a href="{{ .GeneratorURL }}">Source</a><br />
@@ -353,8 +353,8 @@ a {
                 {{ range .Alerts.Resolved }}
                 <tr>
                   <td class="content-block">
-                    <!-- <strong>Labels</strong><br /> -->
-                    <!-- {{ range .Labels.SortedPairs }}{{ .Name }} = {{ .Value }}<br />{{ end }} -->
+                    <strong>Labels</strong><br />
+                    {{ range .Labels.SortedPairs }}{{ .Name }} = {{ .Value }}<br />{{ end }}
                     {{ if gt (len .Annotations) 0 }}<strong>Annotations</strong><br />{{ end }}
                     {{ range .Annotations.SortedPairs }}{{ .Name }} = {{ .Value }}<br />{{ end }}
                     <a href="{{ .GeneratorURL }}">Source</a><br />
