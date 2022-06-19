@@ -61,13 +61,22 @@
     dest: /tmp/prom-sparse.yaml
     mode: 0666
 
+- name: create prom ns
+  kubernetes.core.k8s:
+    state: present
+    #kubeconfig: "{{KUBECONFIG}}"
+    name: prom
+    kind: Namespace
+
 - name: Deploy kube-prometheus-stack with set-file params for templates
   command:
-    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} --namespace prom -f prom-sparse.yaml prom-stack prometheus-community/kube-prometheus-stack --set-file alertmanager.templateFiles.{{"test\\.tmpl"}}=test.tmpl --set-file alertmanager.templateFiles.{{"email\\.default\\.html\\.tmpl"}}=email.default.html --set-file alertmanager.templateFiles.{{"email\\.default\\.txt\\.tmpl"}}=email.default.txt
+    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} --namespace prom -f prom-sparse.yaml prom-stack prometheus-community/kube-prometheus-stack --set-file alertmanager.templateFiles.{{"email\\.default\\.html\\.tmpl"}}=email.default.html --set-file alertmanager.templateFiles.{{"email\\.default\\.txt\\.tmpl"}}=email.default.txt
     chdir: /tmp
   register: helm_cmd
-- debug: msg="{{helm_cmd}}"
+  when: true
+- debug: msg="{{ helm_cmd|default('') }}"
 
+# NOT using this anymore because it does not have a way to send named files like raw helm command above
 # kubectl create ns prom
 #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
 #helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
@@ -82,6 +91,28 @@
     create_namespace: true
   when: false
     #force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
+
+
+- name: block for additional k3s modification
+  block:
+    - name: retrieve kube-dns https-metrics port
+      command:
+        cmd: kubectl get services -n kube-system kube-dns -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
+      register: prom_kube_dns
+    - set_fact:
+        prom_kube_dns_needs_change: "{{prom_kube_dns.stdout|int != 9153}}"
+    - debug:
+        msg: "does kube_dns service port need change? {{prom_kube_dns_needs_change}}"
+    
+    - name: add named port to kube-dns so prometheus ServiceMonitor can point at it
+      command:
+        cmd: 'kubectl patch services -n kube-system kube-dns --type=json -p ''[{ "op":"replace", "path":"/spec/ports, "value": [{"name":"dns","protocol":"UDP","port":53,"targetPort":53},{"name":"http-metrics","protocol":"TCP","port":9153,"targetPort":9153}] }]'''
+      register: kube_dns_service_port
+      when: prom_kube_dns_needs_change
+    - debug: msg="{{kube_dns_service_port.stdout_lines|default('')}}"
+
+  when: false and k8s_implementation == "k3s"
+
 
 # NOW taking care of this in template, changing port for etcd to 2381 to match service
 #

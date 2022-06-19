@@ -36,11 +36,27 @@ prometheus_additional_scrape_configs:
 # http://elatov.github.io/2020/01/alerting-with-prometheus-on-kubernetes/
 - job_name: 'kubernetes-service-endpoints'
   kubernetes_sd_configs:
-  - role: endpoints
+  - role: service
   relabel_configs:
-  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+
+  # must have this attribute
+  - source_labels: [__meta_kubernetes_service_annotationpresent_prometheus_io_scrape]
     action: keep
     regex: true
+
+  # drop service if in these system namespaces
+  - source_labels: [__meta_kubernetes_namespace]
+    action: drop
+    regex: (kube-system|prom)
+
+  # only consider target if port name ends with 'metrics' phrase
+  - source_labels: [__meta_kubernetes_service_port_name]
+    action: keep
+    regex: .*metrics
+
+#  - source_labels: [__meta_kubernetes_service_port_name,__meta_kubernetes_service_annotation_prometheus_io_portname]
+#    target_label: concat_portnames
+
   - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
     action: replace
     target_label: __scheme__

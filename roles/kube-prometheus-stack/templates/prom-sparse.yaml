@@ -31,6 +31,14 @@ defaultRules:
 kubeEtcd:
   enabled: false
 
+# coreDns.serviceMonitor.[portName|httpPortName] unfortunately does not modify the default 'http-metrics'
+# instead we will have to change the service/kube-dns to match
+#coreDns:
+#  enabled: true
+#  serviceMonitor:
+#    portName: metrics
+#    httpPortName: metrics
+
 # matched to service port 'prom-stack-kube-prometheus-kube-controller-manager' -n kube-system
 kubeControllerManager:
   enabled: true
@@ -218,12 +226,9 @@ prometheus:
     # do not require new PrometheusRule to have all the helm labels in order to match
     ruleSelectorNilUsesHelmValues: false
 
-    # additional scrape job, specifically ability to read annotations on Service
-    # annotations:
-    #   prometheus.io/scrape: 'true'
-    #   prometheus.io/path: '/data/metrics'
-    #   prometheus.io/port: '80'
-    additionalScrapeConfigs: {{ prometheus_additional_scrape_configs }}
+    # additional scrape job
+    additionalScrapeConfigs:
+      {{ prometheus_additional_scrape_configs | to_yaml | indent(6,False) }}
 
     # external labels will be common for all alerts and available for templating in AlertManager
     externalLabels: {{ prometheus_external_labels }}
