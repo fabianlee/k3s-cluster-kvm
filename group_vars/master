@@ -39,8 +39,8 @@ prometheus_additional_scrape_configs:
   - role: service
   relabel_configs:
 
-  # must have this attribute
-  - source_labels: [__meta_kubernetes_service_annotationpresent_prometheus_io_scrape]
+  # must have this attribute set to true
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
     action: keep
     regex: true
 
