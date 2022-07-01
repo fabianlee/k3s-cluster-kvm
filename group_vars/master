@@ -32,14 +32,58 @@ prometheus_external_labels:
   env: dev
   jumpbox: localhost.local
 
-prometheus_additional_scrape_configs:
 # http://elatov.github.io/2020/01/alerting-with-prometheus-on-kubernetes/
+prometheus_additional_scrape_configs:
+
+- job_name: 'kubernetes-pod-endpoints'
+  kubernetes_sd_configs:
+  - role: pod
+  relabel_configs:
+
+  # must have this annotation set to true
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+
+  # must have this annotation
+  - source_labels: [__meta_kubernetes_pod_annotationpresent_prometheus_io_port]
+    action: keep
+    regex: true
+
+  # drop service if in these system namespaces
+  - source_labels: [__meta_kubernetes_namespace]
+    action: drop
+    regex: (kube-system|prom)
+
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+    action: replace
+    target_label: __scheme__
+    regex: (https?)
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+    action: replace
+    target_label: __metrics_path__
+    regex: (.+)
+  - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+    action: replace
+    target_label: __address__
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+  - action: labelmap
+    regex: __meta_kubernetes_pod_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: kubernetes_namespace
+  - source_labels: [__meta_kubernetes_service_name]
+    action: replace
+    target_label: kubernetes_name
+
+
 - job_name: 'kubernetes-service-endpoints'
   kubernetes_sd_configs:
   - role: service
   relabel_configs:
 
-  # must have this attribute set to true
+  # must have this annotation set to true
   - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
     action: keep
     regex: true
@@ -53,9 +97,6 @@ prometheus_additional_scrape_configs:
   - source_labels: [__meta_kubernetes_service_port_name]
     action: keep
     regex: .*metrics
-
-#  - source_labels: [__meta_kubernetes_service_port_name,__meta_kubernetes_service_annotation_prometheus_io_portname]
-#    target_label: concat_portnames
 
   - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
     action: replace
