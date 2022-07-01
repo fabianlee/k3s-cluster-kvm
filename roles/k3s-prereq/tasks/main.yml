@@ -152,8 +152,13 @@
       export EDITOR=vim
       export VISUAL=vim
 
+# https://rancher.com/docs/k3s/latest/en/installation/installation-requirements/#networking
 - name: open ufw port for k3s master/worker communication
   ufw: rule=allow port={{item}} proto=tcp
   loop:
-    - "6443"
     - "443"
+    - "6443" # kubernetes API
+    - "10250" #  kubelet metrics
+    - "2379:2380" # HA embedded etcd
+    - "8472" # flannel vxlan
+    - "51820:51821" # flannel wireguard
