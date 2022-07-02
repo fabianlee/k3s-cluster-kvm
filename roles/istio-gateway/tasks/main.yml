@@ -41,7 +41,7 @@
   with_fileglob: "../templates/gateway*.j2"
 - debug: msg="{{stdout.results}}"
 
-- name: allow setting after gateawy configs applied
+- name: allow settling after gateway configs applied
   pause:
     seconds: 15
 

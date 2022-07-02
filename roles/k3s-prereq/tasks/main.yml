@@ -153,7 +153,7 @@
       export VISUAL=vim
 
 # https://rancher.com/docs/k3s/latest/en/installation/installation-requirements/#networking
-- name: open ufw port for k3s master/worker communication
+- name: open ufw firewall ports for k3s communication
   ufw: rule=allow port={{item}} proto=tcp
   loop:
     - "443"

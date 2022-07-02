@@ -16,6 +16,9 @@
   shell: kubectl apply -f ./golang-hello-world-web-on-nginx.yaml
   become: yes
   register: stdout
+  retries: 3
+  delay: 10
+  until: stdout.rc==0
 - debug: msg="{{stdout.stdout_lines}}"
 
 - name: apply deployment for second ingress

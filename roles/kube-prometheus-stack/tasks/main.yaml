@@ -47,15 +47,19 @@
   loop:
     - email.default.html
     - email.default.txt
-- slurp:
-    src: /tmp/email.default.html
-  register: remote_html_content_encoded
-- slurp:
-    src: /tmp/email.default.txt
-  register: remote_txt_content_encoded
-- set_fact:
-    email_html_template: "{{ remote_html_content_encoded.content | b64decode }}"
-    email_txt_template: "{{ remote_txt_content_encoded.content | b64decode }}"
+
+# NOT NECESSARY, we now have helm use --set-file to local files (instead of inline content)
+#- slurp:
+#    src: /tmp/email.default.html
+#  register: remote_html_content_encoded
+#- slurp:
+#    src: /tmp/email.default.txt
+#  register: remote_txt_content_encoded
+#- set_fact:
+#    email_html_template: "{{ remote_html_content_encoded.content | b64decode }}"
+#    email_txt_template: "{{ remote_txt_content_encoded.content | b64decode }}"
+
+
 - template:
     src: prom-sparse.yaml
     dest: /tmp/prom-sparse.yaml
@@ -92,26 +96,28 @@
   when: false
     #force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
 
+# NOT NECESSARY, ServiceMonitor 'prom-stack-kube-prometheus-coredns' able to pick up
+# the coredns component without any customizations
 
-- name: block for additional k3s modification
-  block:
-    - name: retrieve kube-dns https-metrics port
-      command:
-        cmd: kubectl get services -n kube-system kube-dns -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
-      register: prom_kube_dns
-    - set_fact:
-        prom_kube_dns_needs_change: "{{prom_kube_dns.stdout|int != 9153}}"
-    - debug:
-        msg: "does kube_dns service port need change? {{prom_kube_dns_needs_change}}"
-    
-    - name: add named port to kube-dns so prometheus ServiceMonitor can point at it
-      command:
-        cmd: 'kubectl patch services -n kube-system kube-dns --type=json -p ''[{ "op":"replace", "path":"/spec/ports, "value": [{"name":"dns","protocol":"UDP","port":53,"targetPort":53},{"name":"http-metrics","protocol":"TCP","port":9153,"targetPort":9153}] }]'''
-      register: kube_dns_service_port
-      when: prom_kube_dns_needs_change
-    - debug: msg="{{kube_dns_service_port.stdout_lines|default('')}}"
-
-  when: false and k8s_implementation == "k3s"
+#- name: block for additional k3s modification
+#  block:
+#    - name: retrieve kube-dns https-metrics port
+#      command:
+#        cmd: kubectl get services -n kube-system kube-dns -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
+#      register: prom_kube_dns
+#    - set_fact:
+#        prom_kube_dns_needs_change: "{{prom_kube_dns.stdout|int != 9153}}"
+#    - debug:
+#        msg: "does kube_dns service port need change? {{prom_kube_dns_needs_change}}"
+#    
+#    - name: add named port to kube-dns so prometheus ServiceMonitor can point at it
+#      command:
+#        cmd: 'kubectl patch services -n kube-system kube-dns --type=json -p ''[{ "op":"replace", "path":"/spec/ports, "value": [{"name":"dns","protocol":"UDP","port":53,"targetPort":53},{"name":"dns-tcp","protocol":"TCP","port":53,"targetPort":53},{"name":"http-metrics","protocol":"TCP","port":9153,"targetPort":9153}] }]'''
+#      register: kube_dns_service_port
+#      when: prom_kube_dns_needs_change
+#    - debug: msg="{{kube_dns_service_port.stdout_lines|default('')}}"
+#
+#  when: false and k8s_implementation == "k3s"
 
 
 # NOW taking care of this in template, changing port for etcd to 2381 to match service
