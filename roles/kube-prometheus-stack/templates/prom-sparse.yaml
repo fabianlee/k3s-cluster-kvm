@@ -23,21 +23,13 @@ kubeEtcd:
 
 {% elif k8s_implementation == "k3s" %}
 
-# k3s uses sqllite, so we cannot monitor this component
+# k3s uses sqllite, so we cannot monitor etcd in the same manner
 defaultRules:
   rules:
     etcd: false
 
 kubeEtcd:
   enabled: false
-
-# coreDns.serviceMonitor.[portName|httpPortName] unfortunately does not modify the default 'http-metrics'
-# instead we will have to change the service/kube-dns to match
-#coreDns:
-#  enabled: true
-#  serviceMonitor:
-#    portName: metrics
-#    httpPortName: metrics
 
 # matched to service port 'prom-stack-kube-prometheus-kube-controller-manager' -n kube-system
 kubeControllerManager:

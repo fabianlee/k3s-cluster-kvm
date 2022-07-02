@@ -1,0 +1,229 @@
+# full values: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+
+# k3s uses sqllite, so we cannot monitor etcd in the same way
+defaultRules:
+  rules:
+    etcd: false
+
+kubeEtcd:
+  enabled: false
+
+# matched to service port 'prom-stack-kube-prometheus-kube-controller-manager' -n kube-system
+kubeControllerManager:
+  enabled: true
+  endpoints: ['192.168.122.213']
+  service:
+    enabled: true
+    port: 10252
+    targetPort: 10252
+  serviceMonitor:
+    enabled: true
+    https: false
+
+# matched to service port 'prom-stack-kube-prometheus-kube-scheduler' -n kube-system
+kubeScheduler:
+  enabled: true
+  endpoints: ['192.168.122.213']
+  service:
+    enabled: true
+    port: 10251
+    targetPort: 10251
+  serviceMonitor:
+    enabled: true
+    https: false
+
+# matched to service port 'prom-stack-kube-prometheus-kube-proxy' -n kube-system
+kubeProxy:
+  enabled: true
+  endpoints: ['192.168.122.213']
+  service:
+    enabled: true
+    port: 10249
+    targetPort: 10249
+
+
+alertmanager:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: ['alertmanager.k3s.local']
+    paths: ['/']
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - alertmanager.k3s.local
+
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: nfs-client
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    externalUrl: https://alertmanager.k3s.local/
+    routePrefix: /
+
+  tplConfig: false
+  # INSTEAD rely on helm --set-file "alertmanager.templateFiles.email\.default\.html\.tmpl"=pathtofile
+  #templateFiles:
+  #  email.default.html.tmpl: |-
+  #    ... 
+  #  email.default.txt.tmpl: |-
+  #    ...
+
+  config:
+    global:
+      resolve_timeout: 5m
+      # global smtp settings
+      smtp_from: amgr@k3s
+      smtp_smarthost: 10.43.235.116:1025
+      smtp_require_tls: false
+
+    route:
+      group_by: ['job']
+      group_wait: 2s # not default 30
+      group_interval: 30s # not default 5m
+      repeat_interval: 4h # not default 12h
+      receiver: email_platform
+      routes:
+      - receiver: 'null'
+        matchers:
+          - alertname =~ "InfoInhibitor|Watchdog"
+      - receiver: email_platform
+        continue: true
+    receivers:
+    # https://prometheus.io/docs/alerting/latest/configuration/#email_config
+    - name: email_platform
+      email_configs:
+      - to: platform@k3s
+        send_resolved: true
+        headers:
+          # used jinja string to avoid needing to escape curly brackets (which should not be ansible evaluated)
+          subject: "{{ .Status | toUpper }} {{ .CommonLabels.env }}:{{ .CommonLabels.cluster }} {{ .CommonLabels.alertname }}"
+        #html: "{{ range .Alerts }}{{ .Annotations.description }}<br/>{{ end }}"
+        # proper syntax for external template ready by alertmanager
+        # defining both these values will send email in multipart/alternative
+        html: '{{ template "emaildefaulthtml" . }}'
+        text: '{{ template "emaildefaulttxt" . }}'
+
+    - name: 'null'
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
+
+grafana:
+  # username is 'admin'
+  adminPassword: prom-operator
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: ['grafana.k3s.local']
+    path: "/"
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - grafana.k3s.local
+
+prometheus:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: ['prometheus.k3s.local']
+    paths: ['/']
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - prometheus.k3s.local
+
+  prometheusSpec:
+    externalUrl: "https://prometheus.k3s.local/"
+    routePrefix: /
+
+    # do not require new PrometheusRule to have all the helm labels in order to match
+    ruleSelectorNilUsesHelmValues: false
+
+    # additional scrape job
+    additionalScrapeConfigs:
+      - job_name: kubernetes-pod-endpoints
+        kubernetes_sd_configs:
+        - {role: pod}
+        relabel_configs:
+        - action: keep
+          regex: true
+          source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        - action: keep
+          regex: true
+          source_labels: [__meta_kubernetes_pod_annotationpresent_prometheus_io_port]
+        - action: drop
+          regex: (kube-system|prom)
+          source_labels: [__meta_kubernetes_namespace]
+        - action: replace
+          regex: (https?)
+          source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+          target_label: __scheme__
+        - action: replace
+          regex: (.+)
+          source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          target_label: __metrics_path__
+        - action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          target_label: __address__
+        - {action: labelmap, regex: __meta_kubernetes_pod_label_(.+)}
+        - action: replace
+          source_labels: [__meta_kubernetes_namespace]
+          target_label: kubernetes_namespace
+        - action: replace
+          source_labels: [__meta_kubernetes_service_name]
+          target_label: kubernetes_name
+      - job_name: kubernetes-service-endpoints
+        kubernetes_sd_configs:
+        - {role: service}
+        relabel_configs:
+        - action: keep
+          regex: true
+          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        - action: drop
+          regex: (kube-system|prom)
+          source_labels: [__meta_kubernetes_namespace]
+        - action: keep
+          regex: .*metrics
+          source_labels: [__meta_kubernetes_service_port_name]
+        - action: replace
+          regex: (https?)
+          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          target_label: __scheme__
+        - action: replace
+          regex: (.+)
+          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          target_label: __metrics_path__
+        - action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          target_label: __address__
+        - {action: labelmap, regex: __meta_kubernetes_service_label_(.+)}
+        - action: replace
+          source_labels: [__meta_kubernetes_namespace]
+          target_label: kubernetes_namespace
+        - action: replace
+          source_labels: [__meta_kubernetes_service_name]
+          target_label: kubernetes_name
+
+
+    # external labels will be common for all alerts and available for templating in AlertManager
+    externalLabels: {'cluster': 'k3s', 'env': 'dev', 'jumpbox': 'localhost.local'}
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: nfs-client
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
