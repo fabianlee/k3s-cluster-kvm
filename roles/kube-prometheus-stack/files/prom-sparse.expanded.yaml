@@ -106,8 +106,8 @@ alertmanager:
         #html: "{{ range .Alerts }}{{ .Annotations.description }}<br/>{{ end }}"
         # proper syntax for external template ready by alertmanager
         # defining both these values will send email in multipart/alternative
-        html: '{{ template "emaildefaulthtml" . }}'
-        text: '{{ template "emaildefaulttxt" . }}'
+        #html: '{{ template "emaildefaulthtml" . }}'
+        #text: '{{ template "emaildefaulttxt" . }}'
 
     - name: 'null'
     templates:
