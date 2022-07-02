@@ -1,22 +1,37 @@
 ---
 
-- name: get nginx ingress manifest
-  get_url:
-    url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/baremetal/deploy.yaml
-    dest: ./nginx-deploy.yaml
-    mode: '0666'
+# 
+# originally, was getting manifest live from github, but needed to do some replacements
+# including adding labels for prometheus scraping, so much easier to locally template
+#
+# OTHERWISE would have needed to use yq to modify the Deployment->Daemonset
+# yq '. | select(.kind == "Deployment") | (.kind)="DaemonSet" | (.spec.template.metadata.labels) += {"prometheus.io/scrape":"true"} | (.spec.template.metadata.labels) += {"prometheus.io/port":"9093"}' nginx-deploy.yaml
+#
+# and then pull out the other part of the manifest unchanged
+# yq '. | select(.kind != "Deployment")' nginx-deploy.yaml
 
-- name: replace 'NodePort' with 'LoadBalancer'
-  replace:
-    path: ./nginx-deploy.yaml
-    regexp: '  type: NodePort'
-    replace: '  type: LoadBalancer'
+#- name: get nginx ingress manifest
+#  get_url:
+#    url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/baremetal/deploy.yaml
+#    dest: ./nginx-deploy.yaml
+#    mode: '0666'
+#
+#- name: replace 'NodePort' with 'LoadBalancer'
+#  replace:
+#    path: ./nginx-deploy.yaml
+#    regexp: '  type: NodePort'
+#    replace: '  type: LoadBalancer'
+#
+#- name: replace 'Deployment' with 'DaemonSet'
+#  replace:
+#    path: ./nginx-deploy.yaml
+#    regexp: 'kind: Deployment'
+#    replace: 'kind: DaemonSet'
 
-- name: replace 'Deployment' with 'DaemonSet'
-  replace:
-    path: ./nginx-deploy.yaml
-    regexp: 'kind: Deployment'
-    replace: 'kind: DaemonSet'
+- name: copy nginx ingress manifest template
+  template:
+    src: nginx-deploy.yaml
+    dest: .
 
 - name: apply nginx ingress manifest
   k8s:
