@@ -83,7 +83,7 @@ alertmanager:
       smtp_require_tls: false
 
     route:
-      group_by: ['job']
+      group_by: ['alertname']
       group_wait: 2s # not default 30
       group_interval: 30s # not default 5m
       repeat_interval: 4h # not default 12h
@@ -95,13 +95,11 @@ alertmanager:
       - receiver: email_platform
         continue: true
     receivers:
-    # https://prometheus.io/docs/alerting/latest/configuration/#email_config
     - name: email_platform
       email_configs:
       - to: platform@k3s
         send_resolved: true
         headers:
-          # used jinja string to avoid needing to escape curly brackets (which should not be ansible evaluated)
           subject: "{{ .Status | toUpper }} {{ .CommonLabels.env }}:{{ .CommonLabels.cluster }} {{ .CommonLabels.alertname }}"
         #html: "{{ range .Alerts }}{{ .Annotations.description }}<br/>{{ end }}"
         # proper syntax for external template ready by alertmanager
