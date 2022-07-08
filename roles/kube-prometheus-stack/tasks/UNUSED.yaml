@@ -1,0 +1,50 @@
+
+#
+# NOT NECESSARY, we now have helm use --set-file to local files (instead of inline content)
+#
+#- slurp:
+#    src: /tmp/email.default.html
+#  register: remote_html_content_encoded
+#- slurp:
+#    src: /tmp/email.default.txt
+#  register: remote_txt_content_encoded
+#- set_fact:
+#    email_html_template: "{{ remote_html_content_encoded.content | b64decode }}"
+#    email_txt_template: "{{ remote_txt_content_encoded.content | b64decode }}"
+
+
+# NOT using this anymore because it does not have a way to send named files like raw helm command above
+# kubectl create ns prom
+#helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#kubectl --namespace prom get pods -l "release=prom-stack"
+#- name: Deploy kube-prometheus-stack
+#  kubernetes.core.helm:
+#    name: prom-stack
+#    chart_ref: prometheus-community/kube-prometheus-stack
+#    wait: false
+#    values: "{{ lookup('template', role_path + '/templates/prom-sparse.yaml') | from_yaml }}"
+#    release_namespace: prom
+#    create_namespace: true
+
+# NOW taking care of this in template, changing port for etcd to 2381 to match service
+#
+#- name: block for additional kubeadm modification
+#  block:
+#    - name: retrieve prometheus etcd http-metrics TCP port
+#      command:
+#        cmd: kubectl get services -n kube-system prom-stack-kube-prometheus-kube-etcd -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
+#      register: prom_etcd
+#    - set_fact:
+#        prom_etcd_port_needs_change: "{{prom_etcd.stdout|int != 2381}}"
+#    - debug: msg="{{prom_etcd_port_needs_change}}"
+#    
+#    - name: change prometheus etcd service port to 2381 so it can be pulled as metric
+#      command:
+#        cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381,"targetPort":2381}]}}'''
+#      register: etcd_service_port
+#      when: prom_etcd_port_needs_change
+#    - debug: msg="{{etcd_service_port.stdout_lines|default('')}}"
+#
+#  when: k8s_implementation == "kubeadm"
+
