@@ -7,9 +7,22 @@
     mode: 755
     state: directory
 
-- name: create /etc/rancher/k3s/config.yaml for initial k3s installation options
+- name: create /etc/rancher/k3s/config.yaml for initial k3s and CoreDNS installation options
   template:
     src: config.yaml
     dest: /etc/rancher/k3s/config.yaml
     mode: 777
   when: enable_prometheus_monitoring
+
+# provides CoreDNS an DNS lookup independent of node by providing alternate resolv.conf file
+- name: create custom resolv.conf for independent CoreDNS used by kubelet
+  copy:
+    dest: /etc/k3s-resolv.conf
+    owner: root
+    group: root
+    mode: 0660
+    content: |
+      nameserver {{kubelet_dns}}
+  register: new_resolv_conf
+  when: kubelet_use_custom_dns and kubelet_dns is defined
+

@@ -23,6 +23,11 @@ extra_server_args: " --disable servicelb --disable traefik" # klipper disabled, 
 # BUT it works fine without in 1.21 that we are using
 extra_agent_args: ""
 
+# by default, node DNS settings are used (including any search domains)
+# this can override the settings used by kubelet and therefore CoreDNS
+kubelet_use_custom_dns: true
+kubelet_dns: 192.168.122.1
+
 # for SAN certificate with custom CA
 cert_CA: myCA.local
 cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local','mailhog.k3s.local']
