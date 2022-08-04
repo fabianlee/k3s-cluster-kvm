@@ -30,7 +30,7 @@ kubelet_dns: 192.168.122.1
 
 # for SAN certificate with custom CA
 cert_CA: myCA.local
-cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local','mailhog.k3s.local']
+cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local','mailhog.k3s.local','oauthproxy.k3s.local','keycloak.k3s.local']
 cert_domains_secondary_ingress: ['k3s-secondary.local']
 
 # prometheus monitoring put at subdomain by default ('context' is other choice)
