@@ -5,6 +5,9 @@
   become: no
   tasks:
 
+    - debug:
+        msg: "OS release={{ ansible_distribution_release }}, OS version={{ ansible_distribution_version }}"
+
     - name: fetch k3s ansible role from github
       delegate_to: localhost
       git:
@@ -38,9 +41,17 @@
       become: yes
       apt:
         pkg:
-        - python-netaddr
         - python3-netaddr
         state: present
+
+    - name: install local packages needed for ipaddr jinja2 filter, only for older Ubuntu
+      delegate_to: localhost
+      become: yes
+      apt:
+        pkg:
+        - python-netaddr
+        state: present
+      when: ansible_distribution_version is version('22.04','<')
 
     # https://galaxy.ansible.com/ansible/netcommon
     - name: get ansible.netcommon collection from ansible galaxy, be patient can take 5 minutes
@@ -57,11 +68,13 @@
         creates: "{{playbook_dir}}/../collections/ansible_collections/ansible/posix"
         chdir: "{{playbook_dir}}/../collections"
 
-    # pam_limits
-    # https://galaxy.ansible.com/community/general
+    # used for 'pam_limits'
+    # https://galaxy.ansible.com/community/general, 3.4.0 originally
+    # was getting errors on all 3.x versions from django tests, had to switch to 4.x
+    # "ERROR! Unable to extract 'tests/integration/targets/django_manage/files/base_test/1045-single-app-project/single_app_project/core/' from collection"
     - name: get community.general collection from ansible galaxy, be patient can take 5 minutes
       command:
-        cmd: ansible-galaxy collection install community.general:3.4.0 -p .
+        cmd: ansible-galaxy collection install community.general:4.8.6 -p .
         creates: "{{playbook_dir}}/../collections/ansible_collections/community/general"
         chdir: "{{playbook_dir}}/../collections"
 

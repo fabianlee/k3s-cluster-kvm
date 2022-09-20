@@ -1,5 +1,7 @@
 # k3s with primary and secondary nginx or istio ingress
 
+Blog: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
+
 Modify variables for environment
   * vi group_vars/all
 

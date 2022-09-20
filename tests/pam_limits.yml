@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  become: yes
+
+  tasks:
+
+    - shell:
+        cmd: ulimit -n
+      register: softlimit_output
+
+    - name: Current softlimit on file handles
+      debug:
+        var: softlimit_output.stdout_lines
+
+    - pause:
+        prompt: "Continue to change softlimit to 1025"
+
+    - name: soft limit for nofile
+      pam_limits:
+        domain: '*'
+        limit_type: soft
+        limit_item: nofile
+        value: 1025
+
+    - name: check for change in limits.conf
+      shell:
+        cmd: grep nofile /etc/security/limits.conf
+      register: limitsfile
+    - debug:
+        var: limitsfile.stdout_lines
