@@ -12,7 +12,7 @@ Create guest OS with KVM
   * ansible-playbook playbook_terraform.yml
 
 Install k3s:
-  * sudo su ls /tmp
+  * sudo ls /tmp
   * ansible-playbook playbook_k3s_prereq.yml
   * ansible-playbook playbook_k3s.yml
 

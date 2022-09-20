@@ -8,8 +8,8 @@ k3s_version: v1.21.8+k3s1
 k8s_implementation: k3s
 
 metal_lb_prefix: 192.168.2
-metal_lb_primary: "{{metal_lb_prefix}}.143"
-metal_lb_secondary: "{{metal_lb_prefix}}.144"
+metal_lb_primary: "{{metal_lb_prefix}}.93"
+metal_lb_secondary: "{{metal_lb_prefix}}.94"
 
 ansible_user: ubuntu
 systemd_dir: /etc/systemd/system
