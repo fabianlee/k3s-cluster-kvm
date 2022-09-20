@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  become: no
+
+  tasks:
+
+    - set_fact:
+        test1: "{{ '192.0.2.0' | ipaddr }}"
+        test2: "{{ '999.999.999.999' | ipaddr }}"
+
+    - name: test1 should return 199.0.2.0
+      debug:
+        var: test1
+    - name: test2 should return 'False'
+      debug:
+        var: test2
