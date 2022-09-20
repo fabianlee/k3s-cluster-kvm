@@ -1,6 +1,6 @@
 # k3s with primary and secondary nginx or istio ingress
 
-Blog: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
+Blog walk-through: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
 
 Modify variables for environment
   * vi group_vars/all
@@ -12,6 +12,7 @@ Create guest OS with KVM
   * ansible-playbook playbook_terraform.yml
 
 Install k3s:
+  * sudo su ls /tmp
   * ansible-playbook playbook_k3s_prereq.yml
   * ansible-playbook playbook_k3s.yml
 
