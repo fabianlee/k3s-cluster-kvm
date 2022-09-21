@@ -1,6 +1,8 @@
-# k3s with primary and secondary nginx or istio ingress
+# K3s cluster with primary and secondary NGINX or Istio ingress
 
-Blog walk-through: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
+Blog installation: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
+Blog NGINX: https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
+Blog Istio: https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
 
 ## K3s Cluster Installation
 
@@ -22,16 +24,12 @@ Install MetalLB and certificates
   * ansible-playbook playbook_metallb.yml
   * ansible-playbook playbook_certs.yml
 
-
 ## Choose between NGINX Ingress
-https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
 
   * ansible-playbook playbook_nginx.yml
   * ansible-playbook playbook_nginx_test.yml
 
 ## OR Istio Ingress 
-
-https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
 
   * ansible-playbook playbook_istio.yml
   * ansible-playbook playbook_istio_test.yml
