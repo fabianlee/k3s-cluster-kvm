@@ -1,8 +1,8 @@
 # K3s cluster with primary and secondary NGINX or Istio ingress
 
-Blog installation: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
-Blog NGINX: https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
-Blog Istio: https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
+* installation: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
+* NGINX: https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
+* Istio: https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
 
 ## K3s Cluster Installation
 
