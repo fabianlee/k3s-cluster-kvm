@@ -2,6 +2,8 @@
 
 Blog walk-through: https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-ansible/
 
+## K3s Cluster Installation
+
 Modify variables for environment
   * vi group_vars/all
 
@@ -33,6 +35,8 @@ https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gate
 
   * ansible-playbook playbook_istio.yml
   * ansible-playbook playbook_istio_test.yml
+
+## Validate Cluster
 
 Validate kubectl locally:
   * export KUBECONFIG=/tmp/k3s-kubeconfig
