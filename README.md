@@ -20,10 +20,17 @@ Install MetalLB and certificates
   * ansible-playbook playbook_metallb.yml
   * ansible-playbook playbook_certs.yml
 
-Choose between NGINX Ingress or Istio Gateways
+
+## Choose between NGINX Ingress
+https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
+
   * ansible-playbook playbook_nginx.yml
   * ansible-playbook playbook_nginx_test.yml
-  OR
+
+## OR Istio Ingress 
+
+https://fabianlee.org/2021/09/16/kubernetes-k3s-with-multiple-istio-ingress-gateways/
+
   * ansible-playbook playbook_istio.yml
   * ansible-playbook playbook_istio_test.yml
 
