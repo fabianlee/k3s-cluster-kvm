@@ -43,8 +43,9 @@
     dest: /tmp/k3s-kubeconfig
     flat: yes
 
-- name: replace localhost with master-ip {{ master_ip }}
+- name: (localhost) replace localhost with master-ip {{ master_ip }}
   delegate_to: localhost
+  become: false # avoid sudo message because this role is run with become
   replace:
     path: /tmp/k3s-kubeconfig
     regexp: "127.0.0.1"
