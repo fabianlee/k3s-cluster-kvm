@@ -13,22 +13,39 @@
     mode: 0766
   with_fileglob: "*.yaml"
 
-# https://metallb.universe.tf/installation/
-- name: apply metallb manifests
-  k8s:
-    state: present
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
-    src: "/tmp/{{item}}"
-  loop:
-    - namespace.yaml
-    - metallb.yaml
+# https://kubernetes.io/docs/reference/using-api/deprecation-guide/
+- name: BLOCK use older policy/v1beta1.PodSecurityPolicy if kubernetes <= 1.21 (deprecated after)
+  block:
+    # https://metallb.universe.tf/installation/
+    - name: apply metallb manifests
+      k8s:
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        src: "/tmp/{{item}}"
+      loop:
+        - namespace.yaml
+        - metallb.yaml
+    
+    - name: create metallb ns
+      k8s:
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        name: metallb-system
+        kind: Namespace
+  when: k3s_version <= "1.21"
 
-- name: create metallb ns
-  k8s:
-    state: present
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
-    name: metallb-system
-    kind: Namespace
+- name: BLOCK use newer 0.13.9 metalLB manifests if kubernetes > 1.21
+  block:
+    # https://metallb.universe.tf/installation/
+    - name: apply metallb manifests
+      k8s:
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        src: "/tmp/{{item}}"
+      loop:
+        - metallb-native.yaml
+  when: k3s_version > "1.21"
+
 
 - name: create metallb configmap
   k8s:

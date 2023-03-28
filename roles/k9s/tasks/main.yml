@@ -12,14 +12,15 @@
 
 - name: download latest k9s
   get_url:
-    #example: https://github.com/derailed/k9s/releases/download/v0.24.13/k9s_Linux_x86_64.tar.gz
-    url: https://github.com/derailed/k9s/releases/download/{{k9sversion.json.tag_name}}/k9s_Linux_x86_64.tar.gz
+    #old format: https://github.com/derailed/k9s/releases/download/v0.24.13/k9s_Linux_x86_64.tar.gz
+    #new format; https://github.com/derailed/k9s/releases/download/v0.27.3/k9s_Linux_amd64.tar.gz
+    url: https://github.com/derailed/k9s/releases/download/{{k9sversion.json.tag_name}}/k9s_Linux_amd64.tar.gz
     dest: /tmp
     mode: 666
 
 - name: extract k9s 
   unarchive:
-    src: /tmp/k9s_Linux_x86_64.tar.gz
+    src: /tmp/k9s_Linux_amd64.tar.gz
     remote_src: yes
     dest: /tmp
 
