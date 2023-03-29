@@ -47,7 +47,7 @@ local_etc_hosts:
   - ip: 192.168.122.215
     fqdn: k3s-3
   # allows curl to MetalLB endpoints with proper host header
-  - ip: "{{metal_lb_prefix}}.143"
+  - ip: "{{metal_lb_prefix}}.93"
     fqdn: k3s.local
-  - ip: "{{metal_lb_prefix}}.144"
+  - ip: "{{metal_lb_prefix}}.94"
     fqdn: k3s-secondary.local
