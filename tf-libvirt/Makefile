@@ -48,11 +48,17 @@ virsh-create-snapshot:
 	virsh snapshot-create-as k3s-2-192.168.122.214 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
 	virsh snapshot-create-as k3s-3-192.168.122.215 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
 
-virsh-snapshot-delete:
-	virsh destroy k3s-1-192.168.122.213
-	virsh destroy k3s-2-192.168.122.214
-	virsh destroy k3s-3-192.168.122.215
+virsh-snapshot-revert:
+	echo "Stopping all VMs, deleting snapshot to revert..."
+	virsh destroy k3s-1-192.168.122.213 || true
+	virsh destroy k3s-2-192.168.122.214 || true
+	virsh destroy k3s-3-192.168.122.215 || true
 	sleep 5
 	virsh snapshot-delete k3s-1-192.168.122.213 adv-test
 	virsh snapshot-delete k3s-2-192.168.122.214 adv-test
 	virsh snapshot-delete k3s-3-192.168.122.215 adv-test
+
+virsh-start-all:
+	virsh start k3s-1-192.168.122.213 || true
+	virsh start k3s-2-192.168.122.214 || true
+	virsh start k3s-3-192.168.122.215 || true
