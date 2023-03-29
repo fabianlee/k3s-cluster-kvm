@@ -6,14 +6,14 @@ k3s_version: v1.26.2+k3s1 #v1.21.8+k3s1
 k8s_implementation: k3s
 
 metal_lb_prefix: 192.168.2
-metal_lb_primary: "{{metal_lb_prefix}}.93"
-metal_lb_secondary: "{{metal_lb_prefix}}.94"
+metal_lb_primary: "{{metal_lb_prefix}}.143"
+metal_lb_secondary: "{{metal_lb_prefix}}.144"
 
 ansible_user: ubuntu
 systemd_dir: /etc/systemd/system
 master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
+
 # using /etc/rancher/k3s/config.yaml instead of specifying monitoring requirements in args
-#metrics_args: "--kube-controller-manager-arg 'bind-address=0.0.0.0' --kube-controller-manager-arg 'address=0.0.0.0' --kube-proxy-arg 'metrics-bind-address=0.0.0.0' --kube-scheduler-arg 'bind-address=0.0.0.0' --kube-scheduler-arg 'address=0.0.0.0'"
 extra_server_args: " --disable servicelb --disable traefik" # klipper disabled, so metalLB can be used
 
 # https://blog.loitzl.com/posts/k8s-1.20-breaks-nfs-client-provisioner

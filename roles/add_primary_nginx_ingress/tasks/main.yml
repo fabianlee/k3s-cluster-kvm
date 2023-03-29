@@ -28,10 +28,17 @@
 #    regexp: 'kind: Deployment'
 #    replace: 'kind: DaemonSet'
 
-- name: copy nginx ingress manifest template
+- name: copy older nginx ingress manifest template
   template:
     src: nginx-deploy.yaml
     dest: .
+  when: k3s_version <= 'v1.22'
+
+- name: copy nginx ingress v1.7.0 manifest template
+  template:
+    src: nginx-deploy-v1.7.0.yaml
+    dest: nginx-deploy.yaml
+  when: k3s_version >= 'v1.22'
 
 - name: apply nginx ingress manifest
   k8s:

@@ -1,5 +1,8 @@
+# read by k3s at installation (if it exists) at /etc/rancher/k3s/config.yaml
+#
 # https://docs.k3s.io/installation/configuration#configuration-file
-# read by k3s at installation if it exists at /etc/rancher/k3s/config.yaml
+# using instead of long set of params
+#metrics_args: "--kube-controller-manager-arg 'bind-address=0.0.0.0' --kube-controller-manager-arg 'address=0.0.0.0' --kube-proxy-arg 'metrics-bind-address=0.0.0.0' --kube-scheduler-arg 'bind-address=0.0.0.0' --kube-scheduler-arg 'address=0.0.0.0'"
 kube-controller-manager-arg:
 {% if k3s_version <= "v1.21" %}
 - "address=0.0.0.0"
@@ -12,10 +15,9 @@ kube-scheduler-arg:
 - "address=0.0.0.0"
 {% endif %}
 - "bind-address=0.0.0.0"
-{# advertise-address necessary with k3sv1.26, else worker node service fails because defaults to 127.0.0.1:6443 #}
 {% if k3s_version > "v1.21" %}
 kube-apiserver-arg:
-- "advertise-address={{master_ip}}"
+- "advertise-address={{master_ip}}" # necessary with k3sv1.26, else worker nodes fail because default is 127.0.0.1:6443
 - "bind-address=0.0.0.0"
 {% endif %}
 etcd-expose-metrics: true
