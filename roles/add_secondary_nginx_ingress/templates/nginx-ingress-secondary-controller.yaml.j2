@@ -22,7 +22,7 @@ spec:
 {% if k3s_version <= "v1.21" %}
       - image: k8s.gcr.io/ingress-nginx/controller:v0.35.0
 {% else %}
-      - image: k8s.gcr.io/ingress-nginx/controller:v1.1.1
+      - image: registry.k8s.io/ingress-nginx/controller:v1.7.0
 {% endif %}
         name: nginx-ingress
         livenessProbe:
