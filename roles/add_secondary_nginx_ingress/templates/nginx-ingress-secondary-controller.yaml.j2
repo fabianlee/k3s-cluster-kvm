@@ -19,7 +19,11 @@ spec:
       terminationGracePeriodSeconds: 60
       serviceAccountName: ingress-nginx
       containers:
+{% if k3s_version <= "v1.21" %}
       - image: k8s.gcr.io/ingress-nginx/controller:v0.35.0
+{% else %}
+      - image: k8s.gcr.io/ingress-nginx/controller:v1.1.1
+{% endif %}
         name: nginx-ingress
         livenessProbe:
           httpGet:
