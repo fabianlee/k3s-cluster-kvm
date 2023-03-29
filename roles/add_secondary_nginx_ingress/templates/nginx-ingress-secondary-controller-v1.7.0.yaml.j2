@@ -18,7 +18,7 @@ spec:
       terminationGracePeriodSeconds: 60
       serviceAccountName: ingress-nginx
       containers:
-      - image: k8s.gcr.io/ingress-nginx/controller:v0.35.0
+      - image: registry.k8s.io/ingress-nginx/controller:v1.7.0
         name: nginx-ingress
         livenessProbe:
           httpGet:

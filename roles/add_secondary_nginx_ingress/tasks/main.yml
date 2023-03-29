@@ -6,15 +6,25 @@
     dest: "./{{ item | basename | regex_replace('.j2$', '') }}"
   with_fileglob: "../templates/*.j2"
 
-- name: creates secondary nginx ingress controller, first 'nginx' already created by manifest
+- name: creates secondary nginx ingress controller older v0.35, first 'nginx' already created by manifest
   shell: kubectl apply -f {{item}}
   become: yes
   register: stdout
   loop:
     - nginx-ingress-secondary-controller.yaml # nginx definition
-    - ingress-nginx-service-account.yaml # needed with MetalLB 0.13.9, RBAC to update configmap
+  when: k3s_version <= 'v1.21'
 - debug: msg="{{stdout.results}}"
+  when: k3s_version <= 'v1.21'
 
+- name: creates secondary nginx ingress controller v1.7.0, first 'nginx' already created by manifest
+  shell: kubectl apply -f {{item}}
+  become: yes
+  register: stdout
+  loop:
+    - nginx-ingress-secondary-controller-v1.7.0.yaml
+  when: k3s_version > 'v1.21'
+- debug: msg="{{stdout.results}}"
+  when: k3s_version > 'v1.21'
 
 - name: apply metalLB service to additional nics added to master
   shell: kubectl apply -f ./nginx-ingress-secondary-service.yaml
