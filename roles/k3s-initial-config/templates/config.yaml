@@ -23,4 +23,6 @@ etcd-expose-metrics: true
 kubelet-arg:
 - "resolv-conf=/etc/k3s-resolv.conf"
 {% endif %}
+{% if k3s_version >= "v1.26" %}
 flannel-backend: wireguard-native
+{% endif %}
