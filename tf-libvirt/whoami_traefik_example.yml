@@ -1,3 +1,5 @@
+# used in blog article as test for Ingress
+# https://fabianlee.org/2021/09/12/kubernetes-k3s-cluster-on-ubuntu-using-terraform-and-libvirt/
 ---
 apiVersion: apps/v1
 kind: Deployment
