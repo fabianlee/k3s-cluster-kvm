@@ -62,3 +62,7 @@ virsh-start-all:
 	virsh start k3s-1-192.168.122.213 || true
 	virsh start k3s-2-192.168.122.214 || true
 	virsh start k3s-3-192.168.122.215 || true
+virsh-stop-all:
+	virsh destroy k3s-1-192.168.122.213 || true
+	virsh destroy k3s-2-192.168.122.214 || true
+	virsh destroy k3s-3-192.168.122.215 || true
