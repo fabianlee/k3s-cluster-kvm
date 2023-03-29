@@ -1,0 +1,11 @@
+# used instead of configmap for newer versions of MetalLB (v0.13.9)
+# https://metallb.universe.tf/configuration/
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - "{{metal_lb_primary}}-{{metal_lb_secondary}}"

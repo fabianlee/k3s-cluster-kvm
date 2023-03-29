@@ -44,6 +44,7 @@
         src: "/tmp/{{item}}"
       loop:
         - metallb-native.yaml
+        - metallb-ipaddresspool.yml
   when: k3s_version > "1.21"
 
 
