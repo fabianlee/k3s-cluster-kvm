@@ -96,6 +96,13 @@
     replace: '#\1\2\3swap\4'
     backup: yes
 
+- name: disable apparmor service, which would keep Istio ambient mesh from writing file
+  systemd:
+    name: apparmor
+    state: stopped
+    enabled: false
+  register: apparmor_stopped
+
 - name: update editor preferences, Ubuntu
   command: /usr/bin/update-alternatives --set editor /usr/bin/vim.basic
   register: command_result
