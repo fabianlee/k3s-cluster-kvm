@@ -2,9 +2,9 @@
 # list of hosts to be created, use 'for_each' on relevant resources
 locals {
   k3s = {
-    "k3s-1" = { os_code_name = "focal", octetIP = "213", vcpu=4, memoryMB=1024*8, incGB=60 },
-    "k3s-2" = { os_code_name = "focal", octetIP = "214", vcpu=4, memoryMB=1024*8, incGB=60 },
-    "k3s-3" = { os_code_name = "focal", octetIP = "215", vcpu=4, memoryMB=1024*8, incGB=60 },
+    "k3s-1" = { os_code_name = "jammy", octetIP = "213", vcpu=4, memoryMB=1024*8, incGB=60 },
+    "k3s-2" = { os_code_name = "jammy", octetIP = "214", vcpu=4, memoryMB=1024*8, incGB=60 },
+    "k3s-3" = { os_code_name = "jammy", octetIP = "215", vcpu=4, memoryMB=1024*8, incGB=60 },
   }
 }
 
