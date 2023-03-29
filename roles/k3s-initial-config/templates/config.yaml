@@ -22,4 +22,5 @@ etcd-expose-metrics: true
 {% if kubelet_use_custom_dns %}
 kubelet-arg:
 - "resolv-conf=/etc/k3s-resolv.conf"
-{%- endif -%}
+{% endif %}
+flannel-backend: wireguard-native
