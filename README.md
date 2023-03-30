@@ -51,3 +51,4 @@ Validate ingress locally:
   * test istio ingress
     ./test-istio-endpoints.sh
 
+
