@@ -32,6 +32,7 @@
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         name: metallb-system
         kind: Namespace
+
   when: k3s_version <= "1.21"
 
 - name: BLOCK use newer 0.13.9 metalLB manifests if kubernetes > 1.21
