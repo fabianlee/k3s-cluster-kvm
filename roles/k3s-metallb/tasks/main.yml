@@ -50,7 +50,7 @@
 - name: BLOCK use newer CRD (not Configmap) for MetalLB v0.12 and later
   block:
     # https://metallb.universe.tf/installation/
-    - name: apply metallb manifests
+    - name: apply newer CRD style of metallb manifests
       k8s:
         state: present
         kubeconfig: /etc/rancher/k3s/k3s.yaml
@@ -58,6 +58,6 @@
       loop:
         - metallb-native-{{metallb_version}}.yaml
         - metallb-ipaddresspool.yml
-  when: metallb_version > "1.21"
+  when: metallb_version >= "v0.12"
 
 
