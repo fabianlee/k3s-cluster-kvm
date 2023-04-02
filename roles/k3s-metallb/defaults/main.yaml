@@ -1,0 +1,4 @@
+
+# https://metallb.universe.tf/configuration/migration_to_crds/
+# v0.11.0 is latest version of MetalLB that still supports ConfigMap 
+metallb_version: v0.11.0

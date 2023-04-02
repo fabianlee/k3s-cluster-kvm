@@ -1,11 +1,5 @@
 ---
 
-#- name: make k3s.yaml readable without root
-#  become: yes
-#  file:
-#    path: /etc/rancher/k3s/k3s.yaml
-#    mode: 766
-
 - name: copy manifests to /tmp
   copy:
     src: "{{item}}"
@@ -13,9 +7,9 @@
     mode: 0766
   with_fileglob: "*.yaml"
 
-# https://kubernetes.io/docs/reference/using-api/deprecation-guide/
-- name: BLOCK use older policy/v1beta1.PodSecurityPolicy if kubernetes <= 1.21 (deprecated after)
+- name: BLOCK use older ConfigMap style for MetalLB v0.11 and earlier
   block:
+
     # https://metallb.universe.tf/installation/
     - name: apply metallb manifests
       k8s:
@@ -24,18 +18,36 @@
         src: "/tmp/{{item}}"
       loop:
         - namespace.yaml
-        - metallb.yaml
+        - metallb-{{metallb_version}}.yaml
     
-    - name: create metallb ns
+#    - name: ensure metallb-system ns exists
+#      k8s:
+#        state: present
+#        kubeconfig: /etc/rancher/k3s/k3s.yaml
+#        name: metallb-system
+#        kind: Namespace
+
+    - name: create metallb configmap
       k8s:
         state: present
         kubeconfig: /etc/rancher/k3s/k3s.yaml
-        name: metallb-system
-        kind: Namespace
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            namespace: metallb-system
+            name: config
+          data:
+            config: |
+              address-pools:
+              - name: default
+                protocol: layer2
+                addresses:
+                - "{{metal_lb_primary}}-{{metal_lb_secondary}}"
 
-  when: k3s_version <= "1.21"
+  when: metallb_version <= "v0.11"
 
-- name: BLOCK use newer 0.13.9 metalLB manifests if kubernetes > 1.21
+- name: BLOCK use newer CRD (not Configmap) for MetalLB v0.12 and later
   block:
     # https://metallb.universe.tf/installation/
     - name: apply metallb manifests
@@ -44,26 +56,8 @@
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         src: "/tmp/{{item}}"
       loop:
-        - metallb-native.yaml
+        - metallb-native-{{metallb_version}}.yaml
         - metallb-ipaddresspool.yml
-  when: k3s_version > "1.21"
+  when: metallb_version > "1.21"
 
-
-- name: create metallb configmap
-  k8s:
-    state: present
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        namespace: metallb-system
-        name: config
-      data:
-        config: |
-          address-pools:
-          - name: default
-            protocol: layer2
-            addresses:
-            - "{{metal_lb_primary}}-{{metal_lb_secondary}}"
 
