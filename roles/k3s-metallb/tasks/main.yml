@@ -1,11 +1,17 @@
 ---
 
-- name: copy manifests to /tmp
+- name: copy static manifests to /tmp
   copy:
     src: "{{item}}"
     dest: /tmp
     mode: 0766
   with_fileglob: "*.yaml"
+
+- name: create file out of every file in template directory
+  template:
+    src: "{{item}}"
+    dest: /tmp/.
+  with_fileglob: "{{role_path}}/templates/*"
 
 - name: BLOCK use older ConfigMap style for MetalLB v0.11 and earlier
   block:
@@ -45,10 +51,16 @@
                 addresses:
                 - "{{metal_lb_primary}}-{{metal_lb_secondary}}"
 
-  when: metallb_version <= "v0.11"
+  when: metallb_version < "v0.12"
+
 
 - name: BLOCK use newer CRD (not Configmap) for MetalLB v0.12 and later
   block:
+
+    - name: replace 'failurePolicy' on validatingwebhook, otherwise we get validating failures from k3s
+      command:
+        cmd: "sed -i 's/failurePolicy: Fail/failurePolicy: Ignore/' /tmp/metallb-native-{{metallb_version}}.yaml"
+
     # https://metallb.universe.tf/installation/
     - name: apply newer CRD style of metallb manifests
       k8s:
@@ -58,6 +70,7 @@
       loop:
         - metallb-native-{{metallb_version}}.yaml
         - metallb-ipaddresspool.yml
+
   when: metallb_version >= "v0.12"
 
 

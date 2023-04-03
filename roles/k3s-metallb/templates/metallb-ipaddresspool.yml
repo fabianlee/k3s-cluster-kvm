@@ -9,3 +9,9 @@ metadata:
 spec:
   addresses:
   - "{{metal_lb_primary}}-{{metal_lb_secondary}}"
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: empty
+  namespace: metallb-system
