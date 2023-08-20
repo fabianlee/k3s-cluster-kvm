@@ -1,0 +1,28 @@
+# k3s_version = {{ k3s_version }}
+# k3s_major_minor_version = {{ k3s_major_minor_version }}
+{% if k3s_major_minor_version <= "v1.21" %}
+# no longer served at v1.25
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: golang-hello-world-web-pdb
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: golang-hello-world-web
+{% endif %}
+{% if k3s_major_minor_version >= "v1.21" %}
+# available since 1.21
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: golang-hello-world-web-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: golang-hello-world-web
+{% endif %}

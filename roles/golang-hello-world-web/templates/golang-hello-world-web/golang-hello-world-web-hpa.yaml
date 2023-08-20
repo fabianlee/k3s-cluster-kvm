@@ -1,6 +1,8 @@
 # k3s_version = {{ k3s_version }}
 # k3s_major_minor_version = {{ k3s_major_minor_version }}
 {% if k3s_major_minor_version <= "v1.21" %}
+# introduced at ??
+# deprecated in 1.19, no longer serviced at v1.25
 ---
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
@@ -21,6 +23,8 @@ spec:
       targetAverageUtilization: 40 # deprecated at v2beta2
 {% endif %}
 {% if k3s_major_minor_version == "v1.21" %}
+# introduced at v1.18
+# no longer served at v1.26
 ---
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
@@ -41,7 +45,8 @@ spec:
         type: Utilization
         averageUtilization: 40
 {% endif %}
-{% if k3s_major_minor_version > "v1.21" %}
+{% if k3s_major_minor_version >= "v1.23" %}
+# available since v.1.23
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
