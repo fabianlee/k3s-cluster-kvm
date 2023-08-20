@@ -4,18 +4,18 @@
 # using instead of long set of params
 #metrics_args: "--kube-controller-manager-arg 'bind-address=0.0.0.0' --kube-controller-manager-arg 'address=0.0.0.0' --kube-proxy-arg 'metrics-bind-address=0.0.0.0' --kube-scheduler-arg 'bind-address=0.0.0.0' --kube-scheduler-arg 'address=0.0.0.0'"
 kube-controller-manager-arg:
-{% if k3s_version <= "v1.21" %}
+{% if k3s_major_minor_version <= "v1.21" %}
 - "address=0.0.0.0"
 {% endif %}
 - "bind-address=0.0.0.0"
 kube-proxy-arg:
 - "metrics-bind-address=0.0.0.0"
 kube-scheduler-arg:
-{% if k3s_version <= "v1.21" %}
+{% if k3s_major_minor_version <= "v1.21" %}
 - "address=0.0.0.0"
 {% endif %}
 - "bind-address=0.0.0.0"
-{% if k3s_version > "v1.21" %}
+{% if k3s_major_minor_version > "v1.21" %}
 kube-apiserver-arg:
 - "advertise-address={{master_ip}}" # necessary with k3sv1.26, else worker nodes fail because default is 127.0.0.1:6443
 - "bind-address=0.0.0.0"
@@ -25,6 +25,6 @@ etcd-expose-metrics: true
 kubelet-arg:
 - "resolv-conf=/etc/k3s-resolv.conf"
 {% endif %}
-{% if k3s_version >= "v1.26" %}
+{% if k3s_major_minor_version >= "v1.26" %}
 flannel-backend: host-gw
 {% endif %}

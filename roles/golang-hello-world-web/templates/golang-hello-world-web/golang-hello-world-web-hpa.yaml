@@ -1,0 +1,64 @@
+# k3s_version = {{ k3s_version }}
+# k3s_major_minor_version = {{ k3s_major_minor_version }}
+{% if k3s_major_minor_version <= "v1.21" %}
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: golang-hello-world-web-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: golang-hello-world-web
+  minReplicas: 2
+  maxReplicas: 3
+  metrics:
+  # only valid for autoscaling/v2beta1
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 40 # deprecated at v2beta2
+{% endif %}
+{% if k3s_major_minor_version == "v1.21" %}
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: golang-hello-world-web-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: golang-hello-world-web
+  minReplicas: 3
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 40
+{% endif %}
+{% if k3s_major_minor_version > "v1.21" %}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: golang-hello-world-web-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: golang-hello-world-web
+  minReplicas: 2
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 40
+{% endif %}

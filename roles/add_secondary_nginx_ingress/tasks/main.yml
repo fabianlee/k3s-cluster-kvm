@@ -12,9 +12,9 @@
   register: stdout
   loop:
     - nginx-ingress-secondary-controller.yaml # nginx definition
-  when: k3s_version <= 'v1.21'
+  when: k3s_major_minor_version <= 'v1.21'
 - debug: msg="{{stdout.results}}"
-  when: k3s_version <= 'v1.21'
+  when: k3s_major_minor_version <= 'v1.21'
 
 - name: creates secondary nginx ingress controller v1.7.0, first 'nginx' already created by manifest
   shell: kubectl apply -f {{item}}
@@ -22,9 +22,9 @@
   register: stdout
   loop:
     - nginx-ingress-secondary-controller-v1.7.0.yaml
-  when: k3s_version > 'v1.21'
+  when: k3s_major_minor_version > 'v1.21'
 - debug: msg="{{stdout.results}}"
-  when: k3s_version > 'v1.21'
+  when: k3s_major_minor_version > 'v1.21'
 
 - name: apply metalLB service to additional nics added to master
   shell: kubectl apply -f ./nginx-ingress-secondary-service.yaml

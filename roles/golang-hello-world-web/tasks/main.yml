@@ -10,33 +10,43 @@
   file:
     path: "{{item}}"
     state: directory
-  loop: ['primary-ingress','secondary-ingress']
+  loop: ['golang-hello-world-web','golang-hello-world-web2']
 
-- name: render templates for primary-ingress
+- name: render templates for golang-hello-world-web
   template:
     src: "{{item}}"
-    dest: primary-ingress/.
-  with_fileglob: "../templates/primary-ingress/*.*"
+    dest: golang-hello-world-web/.
+  with_fileglob: "../templates/golang-hello-world-web/*.*"
 
-- name: render templates for nginx secondary ingress
+- name: render templates for golang-hello-world-web2
   template:
     src: "{{item}}"
-    dest: secondary-ingress/.
-  with_fileglob: "../templates/secondary-ingress/*.*"
+    dest: golang-hello-world-web2/.
+  with_fileglob: "../templates/golang-hello-world-web2/*.*"
 
-- name: kubectl apply for primary
+- name: kubectl apply for golang-hello-world-web
   become: yes
   shell:
-    cmd: "kubectl apply -f primary-ingress/{{ item | basename }}"
-  with_fileglob: "../templates/primary-ingress/*.*"
+    cmd: "kubectl apply -f golang-hello-world-web/{{ item | basename }}"
+  with_fileglob: "../templates/golang-hello-world-web/*.*"
   register: k8sapply_results
-- debug: msg="{{k8sapply_results}}"
+- debug:
+    msg: "{{ item.stdout_lines }} {{ item.stderr_lines }}"
+  loop: "{{ k8sapply_results.results }}"
+  loop_control:
+    label: "{{ item.rc }}"
 
-- name: kubectl apply for secondary
+- name: kubectl apply for golang-hello-world-web2
   become: yes
   shell:
-    cmd: "kubectl apply -f primary-ingress/{{ item | basename }}"
-  with_fileglob: "../templates/primary-ingress/*.*"
+    cmd: "kubectl apply -f golang-hello-world-web2/{{ item | basename }}"
+  with_fileglob: "../templates/golang-hello-world-web2/*.*"
   register: k8sapply_results
   when: do_second_ingress
-- debug: msg="{{k8sapply_results}}"
+- debug:
+    msg: "{{ item.stdout_lines }} {{ item.stderr_lines }}"
+  loop: "{{ k8sapply_results.results }}"
+  loop_control:
+    label: "{{ item.rc }}"
+  when: do_second_ingress
+
