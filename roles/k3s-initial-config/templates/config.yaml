@@ -3,6 +3,7 @@
 # https://docs.k3s.io/installation/configuration#configuration-file
 # using instead of long set of params
 #metrics_args: "--kube-controller-manager-arg 'bind-address=0.0.0.0' --kube-controller-manager-arg 'address=0.0.0.0' --kube-proxy-arg 'metrics-bind-address=0.0.0.0' --kube-scheduler-arg 'bind-address=0.0.0.0' --kube-scheduler-arg 'address=0.0.0.0'"
+# newer Pod Security Admissions for 1.25+ would need 'admission-control-config-file' argument added
 kube-controller-manager-arg:
 {% if k3s_major_minor_version <= "v1.21" %}
 - "address=0.0.0.0"
