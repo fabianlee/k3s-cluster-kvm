@@ -32,11 +32,11 @@
   template:
     src: nginx-deploy.yaml
     dest: .
-  when: k3s_version <= 'v1.22'
+  when: k3s_version < 'v1.22'
 
-- name: copy nginx ingress v1.7.0 manifest template
+- name: copy nginx ingress v1.8.1 manifest template
   template:
-    src: nginx-deploy-v1.7.0.yaml
+    src: nginx-deploy-v1.8.1.yaml
     dest: nginx-deploy.yaml
   when: k3s_version >= 'v1.22'
 

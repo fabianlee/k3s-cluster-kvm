@@ -104,6 +104,16 @@ rules:
       - get
       - list
       - watch
+  # added because error seen on k3s v1.21.8 on daemonset ngress-nginx/ingress-nginx-controller
+  # Failed to watch failed to list *v1.EndpointSlice: endpointslices.discovery.k8s.io is forbidden: User "system:serviceaccount:ingress-nginx:ingress-nginx" cannot list resource "endpointslices" in API group "discovery.k8s.io" at the cluster scope
+  - apiGroups:
+    - discovery.k8s.io
+    resources:
+    - endpointslices
+    verbs:
+    - list
+    - watch
+    - get
 ---
 # Source: ingress-nginx/templates/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -208,6 +218,28 @@ rules:
     verbs:
       - create
       - patch
+  # added because error seen on k3s v1.21.8 daemonset ngress-nginx/ingress-nginx-controller
+  # error retrieving resource lock ingress-nginx/ingress-controller-leader: leases.coordination.k8s.io "ingress-controller-leader" is forbidden: User "system:serviceaccount:ingress-nginx:ingress-nginx" cannot get resource "leases" in API group "coordination.k8s.io" in the namespace "ingress-nginx"
+  # https://github.com/bitnami/charts/issues/11192
+  - apiGroups:
+    - coordination.k8s.io
+    resourceNames:
+    - ingress-controller-leader # older nginx resource name
+    resources:
+    - leases
+    verbs:
+    - get
+    - update
+    - watch
+    - list
+    - create
+    - update
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+    - leases
+    verbs:
+    - create
 ---
 # Source: ingress-nginx/templates/controller-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1

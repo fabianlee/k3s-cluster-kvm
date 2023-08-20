@@ -6,25 +6,37 @@
   register: getnodes
 - debug: msg="{{getnodes.stdout_lines}}"
 
-- name: create file out of every jinja2 templates
+- name: creates directories
+  file:
+    path: "{{item}}"
+    state: directory
+  loop: ['primary-ingress','secondary-ingress']
+
+- name: render templates for primary-ingress
   template:
     src: "{{item}}"
-    dest: "./{{ item | basename | regex_replace('.j2$', '') }}"
-  with_fileglob: "../templates/*.j2"
+    dest: primary-ingress/.
+  with_fileglob: "../templates/primary-ingress/*.*"
 
-- name: apply deployment /golang-hello-world-web
-  shell: kubectl apply -f ./golang-hello-world-web.yaml
+- name: render templates for nginx secondary ingress
+  template:
+    src: "{{item}}"
+    dest: secondary-ingress/.
+  with_fileglob: "../templates/secondary-ingress/*.*"
+
+- name: kubectl apply for primary
   become: yes
-  register: stdout
-- debug: msg="{{stdout.stdout_lines}}"
+  shell:
+    cmd: "kubectl apply -f primary-ingress/{{ item | basename }}"
+  with_fileglob: "../templates/primary-ingress/*.*"
+  register: k8sapply_results
+- debug: msg="{{k8sapply_results}}"
 
-- name: apply deployment for second ingress
-  block:
-
-    - name: apply deployment /golang-hello-world-web2
-      shell: kubectl apply -f ./golang-hello-world-web2.yaml
-      become: yes
-      register: stdout
-    - debug: msg="{{stdout.stdout_lines}}"
-    
+- name: kubectl apply for secondary
+  become: yes
+  shell:
+    cmd: "kubectl apply -f primary-ingress/{{ item | basename }}"
+  with_fileglob: "../templates/primary-ingress/*.*"
+  register: k8sapply_results
   when: do_second_ingress
+- debug: msg="{{k8sapply_results}}"

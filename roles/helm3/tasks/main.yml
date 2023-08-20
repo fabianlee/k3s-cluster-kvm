@@ -1,18 +1,38 @@
 ---
 
-- name: add helm3 key to apt
-  apt_key:
-    url: https://baltocdn.com/helm/signing.asc
-    state: present
+#
+# apt-keys is deprecated starting at Ubuntu21
+#
+#- name: add helm3 key to apt
+#  apt_key:
+#    url: https://baltocdn.com/helm/signing.asc
+#    state: present
+#
+#- name: add helm3 apt repository
+#  apt_repository:
+#    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+#    state: present
+#    filename: helm3
+#    validate_certs: false
 
+# save ASCII-armored gpg key locally
+- name: get helm3 key, save in /usr/share/keyrings for newer apt deb syntax
+  get_url:
+    url: https://baltocdn.com/helm/signing.asc
+    dest: /usr/share/keyrings/helm3.asc
+    mode: 0644
+
+# add custom apt repo with 'signed-by' referring to gpg key
 - name: add helm3 apt repository
   apt_repository:
-    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+    repo: deb [arch=amd64, signed-by=/usr/share/keyrings/helm3.asc] https://baltocdn.com/helm/stable/debian/ all main
     state: present
     filename: helm3
+    update_cache: yes
+    mode: 0644
     validate_certs: false
 
-- name: make sure apt transport package installed
+- name: make sure apt transport package installed as well as helm
   apt:
     update_cache: true
     pkg:

@@ -1,8 +1,8 @@
 
 # https://metallb.universe.tf/configuration/migration_to_crds/
 # v0.11.0 is latest version of MetalLB that still supports ConfigMap 
-#metallb_version: v0.11.0
+metallb_version: v0.11.0
 
 # for newer K8s clusters that have deprected PodSecurityPolicy
-# requires newer CRD style configuration (not ConfigMap)
-metallb_version: v0.13.5
+# requires newer CRD style configuration with IPAddressPool (not ConfigMap)
+#metallb_version: v0.13.9
