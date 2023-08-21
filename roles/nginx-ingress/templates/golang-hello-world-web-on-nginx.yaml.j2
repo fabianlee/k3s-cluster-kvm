@@ -1,3 +1,35 @@
+# k3s_version = {{ k3s_version }}
+# k3s_major_minor_version = {{ k3s_major_minor_version }}
+{% if k3s_major_minor_version <= "v1.21" %}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: golang-hello-world-web-service
+  #namespace: default
+  annotations:
+    # https://github.com/ubuntu/microk8s/issues/2035
+    # 'nginx' is default for nginx manifests, microk8s changed default to 'public' at microk8s 1.20
+    kubernetes.io/ingress.class: {{ ingress_class }}
+
+    # allows http without forcing redirect to ssl
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{ ssl_redirect|lower }}"
+
+spec:
+  tls:
+  - hosts: {{ cert_domains_primary_ingress | to_json }}
+    # secret must be in same namespace
+    secretName: tls-credential
+  rules:
+
+  - host: {{ cert_domains_primary_ingress | first }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: /myhello
+        backend:
+          serviceName: golang-hello-world-web-service
+          servicePort: 8080
+{% else %}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -28,4 +60,4 @@ spec:
             name: golang-hello-world-web-service
             port:
               number: 8080
-
+{% endif %}
