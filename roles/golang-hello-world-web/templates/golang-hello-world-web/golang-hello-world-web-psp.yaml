@@ -1,11 +1,11 @@
 # k3s_version = {{ k3s_version }}
 # k3s_major_minor_version = {{ k3s_major_minor_version }}
+---
 {% if k3s_major_minor_version <= "v1.25" %}
 # deprecated in v1.21 and no longer served at v1.25
 # https://kubernetes.io/docs/concepts/security/pod-security-policy/
 # https://kubernetes.io/blog/2021/04/06/podsecuritypolicy-deprecation-past-present-and-future/
 # https://msazure.club/podsecuritypolicy-explained-by-examples/
----
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -50,4 +50,9 @@ spec:
   hostPorts:
   - min: 0
     max: 0
+{% else %}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: default
 {% endif %}

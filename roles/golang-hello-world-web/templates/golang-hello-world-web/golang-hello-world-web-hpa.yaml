@@ -35,7 +35,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: golang-hello-world-web
-  minReplicas: 3
+  minReplicas: 2
   maxReplicas: 4
   metrics:
   - type: Resource
@@ -57,7 +57,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: golang-hello-world-web
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 3
   metrics:
   - type: Resource
@@ -65,5 +65,13 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 40
+        averageUtilization: 20
+  behavior: 
+    scaleDown:
+      stabilizationWindowSeconds: 20 # seconds wait before adjusting, avoids flaping
+      policies:
+      - type: Pods
+        value: 1  # number of pods to scale down at one time
+        periodSeconds: 20 # seconds before each scale down
+      selectPolicy: Max
 {% endif %}

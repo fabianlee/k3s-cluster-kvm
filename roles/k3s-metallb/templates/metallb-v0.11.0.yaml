@@ -1,4 +1,6 @@
 # https://github.com/metallb/metallb/blob/v0.11.0/manifests/metallb.yaml
+{% if k3s_major_minor_version < "v1.25" %}
+---
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -79,6 +81,7 @@ spec:
   - configMap
   - secret
   - emptyDir
+{% endif %}
 ---
 apiVersion: v1
 kind: ServiceAccount
