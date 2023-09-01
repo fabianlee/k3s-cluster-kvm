@@ -29,3 +29,8 @@ kubelet-arg:
 {% if k3s_major_minor_version >= "v1.26" %}
 flannel-backend: host-gw
 {% endif %}
+tls-san: {{ kubeapi_additional_tls_san | to_json }} # additional SAN names for kubeapi cert
+disable:
+  #- metrics-server
+  - traefik
+  - servicelb

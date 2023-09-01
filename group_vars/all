@@ -14,8 +14,8 @@ ansible_user: ubuntu
 systemd_dir: /etc/systemd/system
 master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
 
-# using /etc/rancher/k3s/config.yaml instead of specifying monitoring requirements in args
-extra_server_args: " --disable servicelb --disable traefik" # klipper disabled, so metalLB can be used
+# https://docs.k3s.io/installation/packaged-components
+extra_server_args: "" # inserted into systemd invocation of k3s
 
 # https://blog.loitzl.com/posts/k8s-1.20-breaks-nfs-client-provisioner
 # NFS might need to add 'feature-gates=RemoveSelfLink=false' for 1.20+
@@ -31,6 +31,9 @@ kubelet_dns: 192.168.122.1
 cert_CA: myCA.local
 cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local','mailhog.k3s.local','oauthproxy.k3s.local','keycloak.k3s.local']
 cert_domains_secondary_ingress: ['k3s-secondary.local']
+
+# addition SAN names added to kubeapi cert (required to avoid errors in metrics-server for k3s cluster)
+kubeapi_additional_tls_san: ["k3s-2","k3s-3","192.168.122.214","192.168.122.215"]
 
 # prometheus monitoring put at subdomain by default ('context' is other choice)
 prometheus_ingress_at: subdomain
