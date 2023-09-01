@@ -20,7 +20,7 @@
     - name: apply metallb manifests
       k8s:
         state: present
-        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        kubeconfig: ~/.kube/config #/etc/rancher/k3s/k3s.yaml
         src: "/tmp/{{item}}"
       loop:
         - namespace.yaml
@@ -36,7 +36,7 @@
     - name: create metallb configmap
       k8s:
         state: present
-        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        kubeconfig: ~/.kube/config #/etc/rancher/k3s/k3s.yaml
         definition:
           apiVersion: v1
           kind: ConfigMap
@@ -65,7 +65,7 @@
     - name: apply newer CRD style of metallb manifests
       k8s:
         state: present
-        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        kubeconfig: ~/.kube/config #/etc/rancher/k3s/k3s.yaml
         src: "/tmp/{{item}}"
       loop:
         - metallb-native-{{metallb_version}}.yaml
