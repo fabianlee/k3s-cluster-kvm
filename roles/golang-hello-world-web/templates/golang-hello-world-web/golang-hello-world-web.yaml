@@ -100,4 +100,9 @@ spec:
           initialDelaySeconds: 3
           periodSeconds: 3
 
+        resources:
+          requests:
+            cpu: 100m # 1/10th of core (1000m is 1 vcpu)
+            memory: 32M # 32 MegaBytes
+
       restartPolicy: Always
