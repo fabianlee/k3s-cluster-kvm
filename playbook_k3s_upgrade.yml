@@ -1,0 +1,18 @@
+# https://docs.k3s.io/upgrades/manual#manually-upgrade-k3s-using-the-binary
+# https://github.com/k3s-io/k3s/releases
+# ansible-playbook playbook_k3s_upgrade.yml -e "k3s_new_version=v1.27.5-rc3+k3s1"
+# ansible-playbook playbook_k3s_upgrade.yml -e "k3s_new_version=v1.27.4+k3s1"
+---
+
+- hosts: master
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: k3s-upgrade-binary, k3s_new_version }
+
+- hosts: node
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: k3s-upgrade-binary, k3s_new_version }
+

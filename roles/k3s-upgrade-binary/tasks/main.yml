@@ -1,0 +1,39 @@
+---
+
+- fail:
+    msg: "You must pass 'k3s_new_version' as a variable"
+  when: k3s_new_version is undefined
+
+- name: get k3s release binary
+  uri: 
+    url: https://github.com/k3s-io/k3s/releases/download/{{ k3s_new_version }}/k3s
+    dest: ./k3s.{{ k3s_new_version }}
+    follow_redirects: true
+    mode: 0755
+  register: download
+  failed_when: download.failed and download.status!=304
+
+- name: copy k3s to final destination for systemd
+  copy: 
+    remote_src: true
+    src: ./k3s.{{ k3s_new_version }}
+    dest: /usr/local/bin/k3s
+    mode: 0755
+
+- name: show new k3s version
+  command:
+    cmd: /usr/local/bin/k3s --version
+  register: k3sversion
+- debug: var=k3sversion.stdout_lines
+
+- name: (master) restart k3s service with new version
+  systemd:
+    name: k3s
+    state: restarted
+  when: "'master' in group_names"
+
+- name: (node) restart k3s-agent service with new version
+  systemd:
+    name: k3s-node
+    state: restarted
+  when: "'node' in group_names"
