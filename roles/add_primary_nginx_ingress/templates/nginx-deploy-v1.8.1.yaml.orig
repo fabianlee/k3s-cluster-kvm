@@ -363,9 +363,7 @@ spec:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
-  # FAB customized
-  #type: NodePort
-  type: LoadBalancer
+  type: NodePort
 ---
 apiVersion: v1
 kind: Service
@@ -391,9 +389,7 @@ spec:
   type: ClusterIP
 ---
 apiVersion: apps/v1
-# FAB customize
-#kind: Deployment
-kind: DaemonSet
+kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/component: controller
@@ -411,9 +407,6 @@ spec:
       app.kubernetes.io/component: controller
       app.kubernetes.io/instance: ingress-nginx
       app.kubernetes.io/name: ingress-nginx
-      # FAB modified
-      prometheus.io/scrape: true
-      prometheus.io/port: 9093
   strategy:
     rollingUpdate:
       maxUnavailable: 1
