@@ -411,9 +411,6 @@ spec:
       app.kubernetes.io/component: controller
       app.kubernetes.io/instance: ingress-nginx
       app.kubernetes.io/name: ingress-nginx
-      # FAB modified
-      prometheus.io/scrape: true
-      prometheus.io/port: 9093
   strategy:
     rollingUpdate:
       maxUnavailable: 1
@@ -426,6 +423,9 @@ spec:
         app.kubernetes.io/name: ingress-nginx
         app.kubernetes.io/part-of: ingress-nginx
         app.kubernetes.io/version: 1.8.1
+        # FAB custom, needs double quotes around values or error
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9093"
     spec:
       containers:
       - args:

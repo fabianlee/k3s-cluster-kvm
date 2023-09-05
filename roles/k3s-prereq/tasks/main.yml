@@ -169,3 +169,11 @@
     - "2379:2380" # HA embedded etcd
     - "8472" # flannel vxlan
     - "51820:51821" # flannel wireguard
+
+- name: copy any scripts to directory
+  copy:
+    src: "{{item}}"
+    dest: .
+    mode: 0755
+  with_fileglob: "*.sh"
+

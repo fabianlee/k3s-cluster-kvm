@@ -5,6 +5,8 @@
   become: yes
   gather_facts: yes
   roles:
+    # in case any changes in /etc/rancher/k3s/config.yaml
+    - role: k3s-initial-config
     - role: k3s/master
 
 # this role depends on 'token' value retrieved above

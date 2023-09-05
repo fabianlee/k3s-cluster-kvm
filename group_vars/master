@@ -83,10 +83,10 @@ prometheus_additional_scrape_configs:
   - role: service
   relabel_configs:
 
-  # must have this annotation set to true
+  # must have this annotation set
   - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
     action: keep
-    regex: true
+    regex: (true|yes)
 
   # drop service if in these system namespaces
   - source_labels: [__meta_kubernetes_namespace]

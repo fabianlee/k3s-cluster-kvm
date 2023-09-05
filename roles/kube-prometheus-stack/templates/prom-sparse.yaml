@@ -37,11 +37,11 @@ kubeControllerManager:
   endpoints: ['{{master_ip_internal}}']
   service:
     enabled: true
-    port: 10252
-    targetPort: 10252
+    port: 10257
+    targetPort: 10257
   serviceMonitor:
     enabled: true
-    https: false
+    https: true
 
 # matched to service port 'prom-stack-kube-prometheus-kube-scheduler' -n kube-system
 kubeScheduler:
@@ -49,11 +49,11 @@ kubeScheduler:
   endpoints: ['{{master_ip_internal}}']
   service:
     enabled: true
-    port: 10251
-    targetPort: 10251
+    port: 10259
+    targetPort: 10259
   serviceMonitor:
     enabled: true
-    https: false
+    https: true
 
 # matched to service port 'prom-stack-kube-prometheus-kube-proxy' -n kube-system
 kubeProxy:
