@@ -6,6 +6,19 @@
     master_ip_internal: "{{ansible_ens3.ipv4.address}}"
 - debug: msg="{{master_ip_internal}}"
 
+- set_fact:
+    service_ns: prom
+    service_name: prom-stack-kube-prometheus-prometheus
+    deployment_name: adapter-release-prometheus-adapter
+
+- name: get port for service {{service_name}}
+  command:
+    cmd: kubectl get service {{service_name}} -n {{service_ns}} -o=jsonpath='{.spec.ports[?(@.name=="http-web")].port}'
+  register: service_port_cmd
+- debug: var=service_port_cmd.stdout
+- set_fact:
+    service_port: "{{service_port_cmd.stdout}}"
+
 # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
 - name: Add prometheus-community helm repo
   kubernetes.core.helm_repository:
@@ -15,31 +28,39 @@
 - name: status of prometheus-adapter
   kubernetes.core.helm_info:
     name: adapter-release
-    release_namespace: prom
+    release_namespace: "{{service_ns}}"
   register: helm_info
 - debug:
     msg: "{{ helm_info.status.status }}"
   # need conditional or fallback because uninstalled helm chart does not have nested variable
   when: helm_info.status is defined
 
-- name: create prom ns
+- name: create {{service_ns}} ns
   kubernetes.core.k8s:
     state: present
     #kubeconfig: "{{KUBECONFIG}}"
-    name: prom
+    name: "{{service_ns}}"
     kind: Namespace
 
+# helm chart values
+# https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-adapter/values.yaml
 - name: Deploy kube-prometheus-stack with set-file params for templates
   command:
-    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace=prom
+    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --set prometheus.url=http://{{service_name}}.{{service_ns}}.svc --set prometheus.port={{service_port}}
     chdir: /tmp
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
   register: helm_cmd
   when: true
-- debug: msg="{{ helm_cmd|default('') }}"
+- debug:
+    msg: "{{ helm_cmd|default('') }}"
+
+
 
 
 #
 # Have to apply this patch to expose custom metrics
+# https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/walkthrough.md
 #
 - template:
     src: "{{ item }}"
@@ -54,14 +75,34 @@
     state: present
     #kubeconfig: "{{KUBECONFIG}}"
     src: prom-adapter-config.yaml
-    namespace: prom
+    namespace: "{{service_ns}}"
 
-- name: wait for prometheus-adapter deployment to be ready before continuing
-  shell: "kubectl rollout restart deployment -n prom adapter-release-prometheus-adapter"
-  register: adapter_ready
-  until: adapter_ready.rc==0
+
+- name: restart prometheus-adapter deployment to be ready before continuing
+  command:
+    cmd: kubectl rollout restart deployment -n {{service_ns}} {{deployment_name}}
+
+- name: wait for prometheus-adapter deployment to be ready
+  command:
+    cmd: "kubectl rollout status deployment -n {{service_ns}} {{deployment_name}} --timeout=30s"
+  #environment:
+  #  KUBECONFIG: "{{kubeconfig}}"
+  retries: 5
+  delay: 30
+  register: kubectl_dep_ready
+  until: kubectl_dep_ready.rc==0
+
+- name: make sure prometheus-adapter logs does not have error 'unable'
+  shell:
+    cmd: kubectl logs deployment/{{deployment_name}} -n {{service_ns}} | grep -v unable
 
 - name: register API for custom metrics
   kubernetes.core.k8s:
     state: present
     src: api-service.yaml
+
+- name: validate kubectl api on custom metrics
+  shell:
+    cmd: kubectl get --raw /apis/custom.metrics.k8s.io/v1beta2 | jq | grep total_
+  register: custom_api
+- debug: var=custom_api.stdout_lines
