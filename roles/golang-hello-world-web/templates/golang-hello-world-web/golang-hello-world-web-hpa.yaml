@@ -1,28 +1,6 @@
 # k3s_version = {{ k3s_version }}
 # k3s_major_minor_version = {{ k3s_major_minor_version }}
-{% if k3s_major_minor_version <= "v1.21" %}
-# introduced at ??
-# deprecated in 1.19, no longer serviced at v1.25
----
-apiVersion: autoscaling/v2beta1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: golang-hello-world-web-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: golang-hello-world-web
-  minReplicas: 2
-  maxReplicas: 3
-  metrics:
-  # only valid for autoscaling/v2beta1
-  - type: Resource
-    resource:
-      name: cpu
-      targetAverageUtilization: 40 # deprecated at v2beta2
-{% endif %}
-{% if k3s_major_minor_version == "v1.21" %}
+{% if k3s_major_minor_version < "v1.23" %}
 # introduced at v1.18
 # no longer served at v1.26
 ---
@@ -44,8 +22,12 @@ spec:
       target:
         type: Utilization
         averageUtilization: 40
-{% endif %}
-{% if k3s_major_minor_version >= "v1.23" %}
+  # syntax below only valid for autoscaling/v2beta1 which is only valid till 1.25
+#  - type: Resource
+#    resource:
+#      name: cpu
+#      targetAverageUtilization: 40 # deprecated at v2beta2
+{% else %}
 # available since v.1.23
 ---
 apiVersion: autoscaling/v2

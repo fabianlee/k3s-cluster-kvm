@@ -17,7 +17,7 @@
   block:
 
     # https://metallb.universe.tf/installation/
-    - name: apply metallb manifests
+    - name: (older) apply metallb manifests
       k8s:
         state: present
         kubeconfig: ~/.kube/config #/etc/rancher/k3s/k3s.yaml
@@ -33,7 +33,7 @@
 #        name: metallb-system
 #        kind: Namespace
 
-    - name: create metallb configmap
+    - name: (older) create metallb configmap
       k8s:
         state: present
         kubeconfig: ~/.kube/config #/etc/rancher/k3s/k3s.yaml

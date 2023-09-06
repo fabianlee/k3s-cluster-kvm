@@ -40,20 +40,9 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
 
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - golang-hello-world-web
-            topologyKey: "kubernetes.io/hostname"
-
       containers:
       - name: golang-hello-world-web
-        image: fabianlee/docker-golang-hello-world-web:1.0.0
+        image: ghcr.io/fabianlee/docker-prom-golang-hello-world-web:1.0.2
         env:
 
         # default variables available to be overridden
@@ -104,5 +93,8 @@ spec:
           requests:
             cpu: 100m # 1/10th of core (1000m is 1 vcpu)
             memory: 32M # 32 MegaBytes
+          limits:
+            cpu: 250m # 1/4th of core (1000m is 1 vcpu)
+            memory: 48M # 32 MegaBytes
 
       restartPolicy: Always

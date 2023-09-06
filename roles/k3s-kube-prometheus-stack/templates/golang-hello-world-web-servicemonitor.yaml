@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    # specified as matchLabel in 'Prometheus' CRD
+    # this ServiceMonitor will not be found by prometheus unless it matches
+    release: prom-stack
+  name: golang-hello-world-web
+  # does not need to be in 'prom' namespace, works fine in default
+  namespace: default
+spec:
+  endpoints:
+
+  - path: /metrics
+    port: http
+    scheme: http
+    interval: 30s
+
+  jobLabel: golang-hello-world-web
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app: golang-hello-world-web

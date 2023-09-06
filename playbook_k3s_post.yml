@@ -6,6 +6,7 @@
   roles:
     - role: additional-netplan-ip
     - role: k3s-fix-master-node-ip
+    - role: flannel-cni
     - role: k3s-get-kubeconfig-local
     - role: tiny-tools-all-nodes
 

@@ -42,6 +42,7 @@ kubeControllerManager:
   serviceMonitor:
     enabled: true
     https: true
+    insecureSkipVerify: true # https://github.com/onedr0p/home-ops/issues/2378
 
 # matched to service port 'prom-stack-kube-prometheus-kube-scheduler' -n kube-system
 kubeScheduler:

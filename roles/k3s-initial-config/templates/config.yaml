@@ -20,6 +20,9 @@ kubelet-arg:
 - "resolv-conf=/etc/k3s-resolv.conf"
 {% endif %}
 {% if k3s_major_minor_version >= "v1.22" %}
+# https://docs.k3s.io/installation/network-options
+#flannel-iface: 'cni0'
+#flannel-backend: none # we will install flannel ourselves
 flannel-backend: host-gw # uses port 8472
 {% endif %}
 tls-san: {{ kubeapi_additional_tls_san | to_json }} # additional SAN names for kubeapi cert

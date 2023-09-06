@@ -165,6 +165,7 @@
   loop:
     - "443"
     - "6443" # kubernetes API
+    - "6444"
     - "10250" #  kubelet metrics
     - "2379:2380" # HA embedded etcd
     - "8472" # flannel vxlan

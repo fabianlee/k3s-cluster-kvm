@@ -1,0 +1,15 @@
+
+- name: Download flannel manifest
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    dest: .
+    mode: '0664'
+- name: apply flannel
+  kubernetes.core.k8s:
+    state: present
+    src: kube-flannel.yml
+  register: flannel_deployed
+- debug:
+    msg: "{{flannel_deployed.stdout_lines|default('')}}"
+  when: flannel_deployed.changed
+

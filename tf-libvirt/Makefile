@@ -61,6 +61,9 @@ virsh-snapshot-revert:
 	virsh snapshot-revert k3s-1-192.168.122.213 --snapshotname adv-test
 	virsh snapshot-revert k3s-2-192.168.122.214 --snapshotname adv-test
 	virsh snapshot-revert k3s-3-192.168.122.215 --snapshotname adv-test
+	virsh start k3s-1-192.168.122.213 || true
+	virsh start k3s-2-192.168.122.214 || true
+	virsh start k3s-3-192.168.122.215 || true
 
 virsh-start-all:
 	virsh start k3s-1-192.168.122.213 || true

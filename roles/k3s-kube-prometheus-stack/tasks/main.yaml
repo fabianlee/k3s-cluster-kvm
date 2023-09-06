@@ -68,3 +68,8 @@
   when: true
 - debug: msg="{{ helm_cmd|default('') }}"
 
+- name: apply ServiceMonitor to hello world service
+  kubernetes.core.k8s:
+    state: present
+    #kubeconfig: "{{KUBECONFIG}}"
+    src: golang-hello-world-web-servicemonitor.yaml
