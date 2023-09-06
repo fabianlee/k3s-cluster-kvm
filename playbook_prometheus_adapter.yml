@@ -1,0 +1,8 @@
+---
+
+- hosts: master
+  gather_facts: yes
+  become: yes
+  #become_user: ubuntu
+  roles:
+    - prometheus-adapter

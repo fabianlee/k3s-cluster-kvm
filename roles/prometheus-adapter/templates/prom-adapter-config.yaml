@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adapter-config
+  #namespace: prom
+data:
+  config.yaml: |-
+    "rules":
+    - "seriesQuery": |
+         {namespace!="",__name__!~"^container_.*"}
+      "resources":
+        "template": "<<.Resource>>"
+      "name":
+        "matches": "^(.*)_total"
+        "as": ""
+      "metricsQuery": |
+        sum by (<<.GroupBy>>) (
+          irate (
+            <<.Series>>{<<.LabelMatchers>>}[1m]
+          )
+        )

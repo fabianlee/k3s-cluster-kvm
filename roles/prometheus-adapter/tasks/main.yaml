@@ -1,0 +1,67 @@
+# https://github.com/kubernetes-sigs/prometheus-adapter
+# https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/walkthrough.md
+---
+
+- set_fact:
+    master_ip_internal: "{{ansible_ens3.ipv4.address}}"
+- debug: msg="{{master_ip_internal}}"
+
+# https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
+- name: Add prometheus-community helm repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+
+- name: status of prometheus-adapter
+  kubernetes.core.helm_info:
+    name: adapter-release
+    release_namespace: prom
+  register: helm_info
+- debug:
+    msg: "{{ helm_info.status.status }}"
+  # need conditional or fallback because uninstalled helm chart does not have nested variable
+  when: helm_info.status is defined
+
+- name: create prom ns
+  kubernetes.core.k8s:
+    state: present
+    #kubeconfig: "{{KUBECONFIG}}"
+    name: prom
+    kind: Namespace
+
+- name: Deploy kube-prometheus-stack with set-file params for templates
+  command:
+    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace=prom
+    chdir: /tmp
+  register: helm_cmd
+  when: true
+- debug: msg="{{ helm_cmd|default('') }}"
+
+
+#
+# Have to apply this patch to expose custom metrics
+#
+- template:
+    src: "{{ item }}"
+    dest: .
+    mode: 0666
+  loop:
+    - prom-adapter-config.yaml
+    - api-service.yaml
+
+- name: apply patch to configmap adapter-config
+  kubernetes.core.k8s:
+    state: present
+    #kubeconfig: "{{KUBECONFIG}}"
+    src: prom-adapter-config.yaml
+    namespace: prom
+
+- name: wait for prometheus-adapter deployment to be ready before continuing
+  shell: "kubectl rollout restart deployment -n prom adapter-release-prometheus-adapter"
+  register: adapter_ready
+  until: adapter_ready.rc==0
+
+- name: register API for custom metrics
+  kubernetes.core.k8s:
+    state: present
+    src: api-service.yaml
