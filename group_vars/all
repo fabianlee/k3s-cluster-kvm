@@ -28,6 +28,11 @@ extra_agent_args: ""
 kubelet_use_custom_dns: true
 kubelet_dns: 192.168.122.1
 
+# enable if we want to do manual flannel installation (outside of K3s integration)
+manual_flannel_installation: false
+# https://docs.k3s.io/installation/network-options
+flannel_backend: host-gw
+
 # for SAN certificate with custom CA
 cert_CA: myCA.local
 cert_domains_primary_ingress: ['k3s.local','k3s-alt.local','grafana.k3s.local','prometheus.k3s.local','alertmanager.k3s.local','mailhog.k3s.local','oauthproxy.k3s.local','keycloak.k3s.local']
