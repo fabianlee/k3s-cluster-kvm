@@ -5,4 +5,4 @@
   become: yes
   #become_user: ubuntu
   roles:
-    - kube-prometheus-stack
+    - k3s-kube-prometheus-stack

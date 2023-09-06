@@ -68,6 +68,14 @@
   when: true
 - debug: msg="{{ helm_cmd|default('') }}"
 
+
+#
+# Have to apply this after Prometheus is installed, so ServiceMonitor CRD exists !
+#
+- template:
+    src: golang-hello-world-web-servicemonitor.yaml
+    dest: .
+    mode: 0666
 - name: apply ServiceMonitor to hello world service
   kubernetes.core.k8s:
     state: present

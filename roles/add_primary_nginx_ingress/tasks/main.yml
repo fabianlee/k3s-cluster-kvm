@@ -45,3 +45,12 @@
     state: present
     #kubeconfig: "{{kubeconfig}}"
     src: ./nginx-deploy.yaml
+
+- name: wait for nginx daemonset to be ready before continuing
+  shell: "kubectl rollout status daemonset -n ingress-nginx ingress-nginx-controller --timeout=45s"
+  #environment:
+  #  KUBECONFIG: "{{kubeconfig}}"
+  retries: 10
+  delay: 30
+  register: kubectl_nginx_ready
+  until: kubectl_nginx_ready.rc==0
