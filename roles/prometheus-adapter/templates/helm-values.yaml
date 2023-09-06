@@ -1,0 +1,20 @@
+prometheus:
+  url: http://{{service_name}}.{{service_ns}}.svc
+  port: {{service_port}}
+
+# https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/config-walkthrough.md
+rules:
+  custom:
+  - seriesQuery: '{namespace!="",__name__!~"^container_.*"}'
+    resources:
+      template: "<<.Resource>>"
+    name:
+      matches: "^(.*)_total"
+      as: "${1}_per_min"
+    metricsQuery: 'sum(rate(<<.Series>>{<<.LabelMatchers>>}[2m])) by (<<.GroupBy>>)'
+#    metricsQuery: |
+#      sum by (<<.GroupBy>>) (
+#        irate (
+#          <<.Series>>{<<.LabelMatchers>>}[1m]
+#        )
+#      )

@@ -11,7 +11,7 @@ data:
       "resources":
         "template": "<<.Resource>>"
       "name":
-        "matches": "^(.*)_total"
+        "matches": "^(.*)_total|^(.*)_count"
         "as": ""
       "metricsQuery": |
         sum by (<<.GroupBy>>) (

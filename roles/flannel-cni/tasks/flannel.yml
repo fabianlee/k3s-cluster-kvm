@@ -15,7 +15,7 @@
     msg: "{{flannel_deployed.stdout_lines|default('')}}"
   when: flannel_deployed.changed
 
-- name: change flannel network CIDR
+- name: change flannel network CIDR from pod CIDR 10.244.0.0 to Flannel CNI 10.42.0.0 network
   shell:
     cmd: kubectl get cm kube-flannel-cfg -n kube-flannel -o yaml | sed 's#10.244.0.0/16#10.42.0.0/16#' | kubectl apply -f -
   register: configmap_kubectl_patch

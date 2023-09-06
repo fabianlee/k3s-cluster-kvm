@@ -42,7 +42,8 @@ spec:
 
       containers:
       - name: golang-hello-world-web
-        image: ghcr.io/fabianlee/docker-prom-golang-hello-world-web:1.0.2
+        # version 1.0.3 exposes 'request_count_total' at '/metrics' endpoint for prometheus-adapter
+        image: ghcr.io/fabianlee/docker-prom-golang-hello-world-web:1.0.3
         env:
 
         # default variables available to be overridden

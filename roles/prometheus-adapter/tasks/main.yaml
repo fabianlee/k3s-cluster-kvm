@@ -44,10 +44,18 @@
 
 # helm chart values
 # https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-adapter/values.yaml
+- template:
+    src: helm-values.yaml
+    dest: .
+    mode: 0666
+
 - name: Deploy kube-prometheus-stack with set-file params for templates
   command:
-    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --set prometheus.url=http://{{service_name}}.{{service_ns}}.svc --set prometheus.port={{service_port}}
-    chdir: /tmp
+    #
+    # instead of setting each value, now going to use values file (which also includes complex custom rule)
+    #
+    #cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --set prometheus.url=http://{{service_name}}.{{service_ns}}.svc --set prometheus.port={{service_port}}
+    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --values=./helm-values.yaml
   environment:
     KUBECONFIG: "{{kubeconfig}}"
   register: helm_cmd
@@ -59,7 +67,7 @@
 
 
 #
-# Have to apply this patch to expose custom metrics
+# enable custom metrics API
 # https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/walkthrough.md
 #
 - template:
@@ -67,16 +75,7 @@
     dest: .
     mode: 0666
   loop:
-    - prom-adapter-config.yaml
     - api-service.yaml
-
-- name: apply patch to configmap adapter-config
-  kubernetes.core.k8s:
-    state: present
-    #kubeconfig: "{{KUBECONFIG}}"
-    src: prom-adapter-config.yaml
-    namespace: "{{service_ns}}"
-
 
 - name: restart prometheus-adapter deployment to be ready before continuing
   command:
