@@ -30,8 +30,8 @@ kubelet_dns: 192.168.122.1
 
 # enable if we want to do manual flannel installation (outside of K3s integration)
 manual_flannel_installation: false
-# https://docs.k3s.io/installation/network-options
-flannel_backend: host-gw
+# https://docs.k3s.io/installation/network-options (host-gw,wireguard-native)
+flannel_backend: wireguard-native
 
 # for SAN certificate with custom CA
 cert_CA: myCA.local
