@@ -105,3 +105,26 @@
     cmd: kubectl get --raw /apis/custom.metrics.k8s.io/v1beta2 | jq | grep total_
   register: custom_api
 - debug: var=custom_api.stdout_lines
+
+
+#
+# Update HorizontalPodAutoscale to use custom prometheus-adapter metrics
+#
+- template:
+    src: "{{ item }}"
+    dest: .
+    mode: 0666
+  loop:
+    - golang-hello-world-web-hpa.yaml
+
+- name: deploy updated HorizontalPodAutoscaler for hello service based on prometheus-adapter metrics
+  shell:
+    cmd: kubectl apply -f golang-hello-world-web-hpa.yaml
+  register: k8s_apply
+- debug: var=k3s_apply.stdout_lines
+
+- name: show custom metrics available on golang-hello-world-web
+  shell:
+    cmd: kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta2/namespaces/default/pods/*/request_count_per_min?selector=app%3Dgolang-hello-world-web" | jq
+  register: custom_metrics
+- debug: var=custom_metrics.stdout_lines
