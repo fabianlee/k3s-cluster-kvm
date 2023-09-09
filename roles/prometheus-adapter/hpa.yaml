@@ -1,0 +1,38 @@
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: golang-hello-world-web-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: golang-hello-world-web
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+# Instead of using standard utilization metrics, use custom metrics from prometheus-adapter
+#  - type: Resource
+#    resource:
+#      name: cpu
+#      target:
+#        type: Utilization
+#        averageUtilization: 20
+  - type: Pods
+    pods:
+      metric:
+        # raw pod metric is 'request_count_promtotal'
+        # but configmap defined custom rule matches with '^(.*)_promtotal'
+        # and custom prometheus-adapter rule changes to '{$1}_per_min'
+        name: request_count_per_min
+      target:
+        type: Value
+        averageValue: 500m # 500 milli-requests/second = 1 request every 2 seconds
+  behavior: 
+    scaleDown:
+      stabilizationWindowSeconds: 20 # seconds wait before adjusting, avoids flaping
+      policies:
+      - type: Pods
+        value: 1  # number of pods to scale down at one time
+        periodSeconds: 20 # seconds before each scale down
+      selectPolicy: Max

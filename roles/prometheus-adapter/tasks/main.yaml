@@ -54,8 +54,8 @@
     #
     # instead of setting each value, now going to use values file (which also includes complex custom rule)
     #
-    #cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --set prometheus.url=http://{{service_name}}.{{service_ns}}.svc --set prometheus.port={{service_port}}
-    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --values=./helm-values.yaml
+    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --set prometheus.url=http://{{service_name}}.{{service_ns}}.svc --set prometheus.port={{service_port}} --values=./helm-values.yaml
+    #cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --values=./helm-values.yaml
   environment:
     KUBECONFIG: "{{kubeconfig}}"
   register: helm_cmd
@@ -77,6 +77,12 @@
   loop:
     - api-service.yaml
 
+- name: register API for custom metrics
+  kubernetes.core.k8s:
+    state: present
+    src: api-service.yaml
+
+
 - name: restart prometheus-adapter deployment to be ready before continuing
   command:
     cmd: kubectl rollout restart deployment -n {{service_ns}} {{deployment_name}}
@@ -94,11 +100,6 @@
 - name: make sure prometheus-adapter logs does not have error 'unable'
   shell:
     cmd: kubectl logs deployment/{{deployment_name}} -n {{service_ns}} | grep -v unable
-
-- name: register API for custom metrics
-  kubernetes.core.k8s:
-    state: present
-    src: api-service.yaml
 
 - name: validate kubectl api on custom metrics
   shell:
