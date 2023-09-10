@@ -122,7 +122,7 @@
   shell:
     cmd: kubectl apply -f golang-hello-world-web-hpa.yaml
   register: k8s_apply
-- debug: var=k3s_apply.stdout_lines
+- debug: var=k8s_apply.stdout_lines
 
 - name: show custom metrics available on golang-hello-world-web
   shell:
