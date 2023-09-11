@@ -10,7 +10,7 @@ apply: init libvirt-prereq
 init: create-keypair
 	$(TF) init
 
-destroy:
+destroy: virsh-snapshot-delete
 	$(TF) destroy -auto-approve
 	./clean-known-hosts.sh
 	#rm terraform.tfstate*
@@ -56,9 +56,9 @@ virsh-snapshot-create: virsh-stop-all
 virsh-snapshot-delete: virsh-stop-all
 	sleep 5
 	virsh version
-	virsh snapshot-delete k3s-1-192.168.122.213 adv-test
-	virsh snapshot-delete k3s-2-192.168.122.214 adv-test
-	virsh snapshot-delete k3s-3-192.168.122.215 adv-test
+	virsh snapshot-delete k3s-1-192.168.122.213 adv-test || true
+	virsh snapshot-delete k3s-2-192.168.122.214 adv-test || true
+	virsh snapshot-delete k3s-3-192.168.122.215 adv-test || true
 
 virsh-snapshot-revert: virsh-stop-all
 	sleep 5
