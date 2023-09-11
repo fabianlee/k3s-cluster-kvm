@@ -45,18 +45,22 @@ validate-cloud-config:
 
 ## older libvirt needed diskspec and still did not create proper internal disk snapshot.
 ## --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
-virsh-create-snapshot:
+virsh-snapshot-create: virsh-stop-all
 	echo "older libvirt/qemu on Ubuntu 20 needed diskspec, ubuntu22 libvirt8.0/qemu6.2 does not require"
+	sleep 5
 	virsh version
 	virsh snapshot-create-as k3s-1-192.168.122.213 --name adv-test
 	virsh snapshot-create-as k3s-2-192.168.122.214 --name adv-test
 	virsh snapshot-create-as k3s-3-192.168.122.215 --name adv-test
 
-virsh-snapshot-revert:
-	echo "Stopping all VMs, reverting snapshot..."
-	virsh destroy k3s-1-192.168.122.213 || true
-	virsh destroy k3s-2-192.168.122.214 || true
-	virsh destroy k3s-3-192.168.122.215 || true
+virsh-snapshot-delete: virsh-stop-all
+	sleep 5
+	virsh version
+	virsh snapshot-delete k3s-1-192.168.122.213 adv-test
+	virsh snapshot-delete k3s-2-192.168.122.214 adv-test
+	virsh snapshot-delete k3s-3-192.168.122.215 adv-test
+
+virsh-snapshot-revert: virsh-stop-all
 	sleep 5
 	virsh snapshot-revert k3s-1-192.168.122.213 --snapshotname adv-test
 	virsh snapshot-revert k3s-2-192.168.122.214 --snapshotname adv-test
@@ -66,10 +70,12 @@ virsh-snapshot-revert:
 	virsh start k3s-3-192.168.122.215 || true
 
 virsh-start-all:
+	echo "Starting all VMs..."
 	virsh start k3s-1-192.168.122.213 || true
 	virsh start k3s-2-192.168.122.214 || true
 	virsh start k3s-3-192.168.122.215 || true
 virsh-stop-all:
+	echo "Stopping all VMs..."
 	virsh destroy k3s-1-192.168.122.213 || true
 	virsh destroy k3s-2-192.168.122.214 || true
 	virsh destroy k3s-3-192.168.122.215 || true
