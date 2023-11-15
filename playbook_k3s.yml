@@ -10,6 +10,7 @@
     - role: k3s/master
     - role: k3s-get-kubeconfig-local
     - role: flannel-cni
+    - role: k3s-oidc
 
 # this role depends on 'token' value retrieved above
 # role comes from https://github.com/k3s-io/k3s-ansible

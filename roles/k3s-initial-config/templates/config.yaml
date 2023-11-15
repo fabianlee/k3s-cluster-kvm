@@ -13,6 +13,7 @@ kube-apiserver-arg:
 {% endif %}
 - "bind-address=0.0.0.0"
 {% if prometheus_enabled %}
+- "anonymous-auth=true"
 etcd-expose-metrics: true
 {% endif %}
 {% if kubelet_use_custom_dns %}
