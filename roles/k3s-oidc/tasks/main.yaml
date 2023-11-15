@@ -4,6 +4,8 @@
 # curl --cacert ./ca.crt -X GET  -H "Accept: application/json, */*" -H "User-Agent: kubectl/v1.28.3 (linux/amd64) kubernetes/a8a1abc" 'https://192.168.122.213:6443/.well-known/openid-configuration'
 - name: add role that allows unauthenticated access to OIDC endpoint of cluster
   shell: kubectl create clusterrolebinding service-account-issuer-discovery-unauthenticated --clusterrole=system:service-account-issuer-discovery --group=system:unauthenticated
+  register: out
+  failed_when: out.rc!=0 and ('already exists' not in out.stderr)
   #environment:
   #  KUBECONFIG: /home/ubuntu/.kube/config
   retries: 2
