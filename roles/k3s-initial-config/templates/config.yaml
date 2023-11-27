@@ -12,8 +12,8 @@ kube-apiserver-arg:
 - "advertise-address={{master_ip}}" # necessary with k3sv1.26, else worker nodes fail because default is 127.0.0.1:6443
 {% endif %}
 - "bind-address=0.0.0.0"
+- "anonymous-auth=true" # to allow pull of ./well-known/openid-configuration (otherwise 401)
 {% if prometheus_enabled %}
-- "anonymous-auth=true"
 etcd-expose-metrics: true
 {% endif %}
 {% if kubelet_use_custom_dns %}
